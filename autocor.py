@@ -4,22 +4,24 @@ import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
-data = pd.read_csv('eurusd.csv')
-p = data['Price']
+from sys import argv
+raw = pd.read_csv(argv[1])
+data = raw.head(500)
+p = data['BidClose']
 low = min(p)
 high = max(p)
 span = high - low
 s = pd.Series(p)
 n = len(s)
 r = pd.Series([low + span * random() for i in range(n)])
-t = [pd.to_datetime(date, format = '%b %d %Y') for date in data['Date']]
+t = [pd.to_datetime((d + '-' + h), format = '%Y-%m-%d-%H:%M') for (d, h) in zip(data['Date'], data['Hour'])]
 fig, ax = plt.subplots(2, figsize = (8, 6))
 ax[0].plot(t, r, color = 'blue', alpha = 0.3)
 ax[0].plot(t, s, color = 'red')
 ax[0].set_xlabel('Time')
 ax[0].set_ylabel('Price')
 xmarks = [t[i] for i in range(0, n, 60)]
-ax[0].set_xticks(xmarks)
+plt.xticks(xmarks, rotation = 90)
 lag = [l for l in range(0, n - 1)]
 dac = [s.autocorr(l) for l in lag]
 rac = [r.autocorr(l) for l in lag]

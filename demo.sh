@@ -10,11 +10,11 @@ gnuplot demo.plot
 grep -v -e '^[[:space:]]*$' demo.dat > noblanks.dat
 python3 psar.py
 python3 folding.py; gnuplot fold.plot
-python3 autocor.py
+python3 autocor.py $workdir/eurusd_hour.csv 
 cp *.eps $workdir
 # recompile the manuscript (not in the repo)
 cd $workdir 
 pdflatex --interaction=batchmode schaeffer
-bibtex --interaction=batchmode schaeffer
+bibtex schaeffer
 pdflatex --interaction=batchmode schaeffer
-open schaeffer.pdf # open the PDF in OS X
+open schaeffer.pdf 

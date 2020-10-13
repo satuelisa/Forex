@@ -3,6 +3,8 @@ HAC = None
 with open('demo.dat') as data:
     for line in data:
         data = line.split()
+        if len(data) == 0:
+            continue
         step = data[0]
         date = data[-1]
         opening = float(data[1])        

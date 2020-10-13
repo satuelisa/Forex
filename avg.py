@@ -3,8 +3,9 @@ dates = []
 with open('demo.dat') as data:
     for line in data:
         fields = line.split()
-        dates.append(fields[-1])
-        series.append(float(fields[-2])) # closing price
+        if len(fields) > 0:
+            dates.append(fields[-1])
+            series.append(float(fields[-2])) # closing price
 
 for l in [5, 21, 89]:
     # rolling average

@@ -3,6 +3,8 @@ dates = []
 with open('demo.dat') as data:
     for line in data:
         f = line.split()
+        if len(f) == 0:
+            continue
         dates.append(f[-1])
         series.append(float(f[-2])) # closing price
 

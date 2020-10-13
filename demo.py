@@ -1,19 +1,6 @@
 from random import random
 import datetime
 
-month = {'Jan' : 1,
-         'Feb' : 2,
-         'Mar' : 3,
-         'Apr' : 4,
-         'May' : 5,
-         'Jun' : 6,
-         'Jul' : 7,
-         'Aug' : 8,
-         'Sep' : 9, 
-         'Oct' : 10,
-         'Nov' : 11,
-         'Dec' : 12}
-
 def change(magnitude = 20):
     return -magnitude / 2 + magnitude * random()
 
@@ -43,19 +30,34 @@ else:
         step = 0
         raw.readline() # header
         data = [line for line in raw]
-        for line in data[::-1]: # the other way around
+        prev = None
+        for line in data:
             fields = line.split(',')
-            date = fields.pop(0).split()
-            m = month[date.pop(0)]
-            d = int(date.pop(0))
+            date = fields.pop(0).split('-')
             y = int(date.pop(0))
-            closing = float(fields.pop(0))
-            opening = float(fields.pop(0))
-            high = float(fields.pop(0))
-            low = float(fields.pop(0))
-            print(step, opening, low, high, closing, f'{y}-{m:02d}-{d:02d}')
-            step += 1 if datetime.date(y, m, d).weekday() < 4 else 3 # skip Sat and Sun
-            
+            m = int(date.pop(0))
+            d = int(date.pop(0))
+            h = int(fields.pop(0).split(':')[0])
+            date = datetime.date(y, m, d)
+            hour = datetime.time(hour = h, minute = 0)
+            t = datetime.datetime.combine(date, hour)
+            bidOpen = float(fields.pop(0))
+            bidHigh = float(fields.pop(0))
+            bidLow = float(fields.pop(0))            
+            bidClose = float(fields.pop(0))
+            bidChange = float(fields.pop(0)) # ignored for now
+            askOpen = float(fields.pop(0))
+            askHigh = float(fields.pop(0))
+            askLow = float(fields.pop(0))
+            print(step, bidOpen, bidLow, bidHigh, bidClose, t.strftime('%Y-%m-%d-%H'))
+            step += 1
+            if prev is not None:
+                skip = (t - prev).days * 24
+                t += datetime.timedelta(hours = skip)
+                print('  ') # blank lines for discontinuities in gnuplot
+                step += skip
+            prev = t
+             
             
     
                     

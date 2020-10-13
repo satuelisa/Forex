@@ -3,27 +3,32 @@ set size 3, 1.2
 
 set xlabel 'Time'
 set xdata time
-set timefmt "%Y-%m-%d"
-set format x "%Y-%m-%d"
+
+set timefmt "%Y-%m-%d-%H"
+set format x "%Y-%m-%d %H:00"
 set autoscale xfix
+set datafile missing 'NA'
+set style fill solid noborder
+set yrange [1.24:1.31]
+set ytics 1.25, 0.01
+set xrange ["2010-07-01-01":"2010-07-31-23"]
 
 set style fill solid noborder
-set xrange ["2019-12-31":"2020-10-01"]
+
 unset key
-set yrange [1.04:1.21]
-set ytics 1.05, 0.05
+
 
 set output 'zz_1.eps'
 set ylabel 'Closing price'
 plot 'demo.dat' using 6:5 title 'Closing' with lines lt -1 lw 6 lc rgb '#000000', \
-     'zigzag_1.0.dat' using 3:2 title 'One percent' with linespoints lt -1 lw 10 lc rgb '#ff0000', \
+     'zigzag_0.1.dat' using 3:2 title 'One percent' with linespoints lt -1 lw 10 lc rgb '#ff0000', \
 
 set output 'zz_2.eps'
 plot 'demo.dat' using 6:5 title 'Closing' with lines lt -1 lw 6 lc rgb '#000000', \
-     'zigzag_0.5.dat' using 3:2 title 'Half percent' with linespoints lt -1 lw 10 lc rgb '#009900', \
+     'zigzag_0.05.dat' using 3:2 title 'Half percent' with linespoints lt -1 lw 10 lc rgb '#009900', \
 
 set output 'zz_3.eps'
 plot 'demo.dat' using 6:5 title 'Closing' with lines lt -1 lw 6 lc rgb '#000000', \
-     'zigzag_0.1.dat' using 3:2 title 'Tenth of a percent' with linespoints lt -1 lw 10 lc rgb '#0000ff'	
+     'zigzag_0.01.dat' using 3:2 title 'Tenth of a percent' with linespoints lt -1 lw 10 lc rgb '#0000ff'	
 
 

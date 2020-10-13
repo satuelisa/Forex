@@ -69,7 +69,8 @@ def psar(barsdata, iaf = 0.02, maxaf = 0.2):
     return {"dates":dates, "high":high, "low":low, "close":close, "psar":psar, "psarbear":psarbear, "psarbull":psarbull}
 
 if __name__ == "__main__":
-    barsdata = pd.read_csv('demo.dat', sep=' ', header = None, names = ['Step', 'Open', 'Low', 'High', 'Close', 'Date'])
+    raw = pd.read_csv('noblanks.dat', sep=' ', header = None, names = ['Step', 'Open', 'Low', 'High', 'Close', 'Date'])
+    barsdata = raw.head(500) # just plot a subset
     # ascending dates are expected in the function
     result = psar(barsdata)
     t = result['dates']
@@ -83,5 +84,6 @@ if __name__ == "__main__":
     plt.xlabel('Time')
     plt.ylabel('Parabolic SAR')
     xmarks = [t[i] for i in range(0, len(t), 60)]
-    plt.xticks(xmarks)
+    plt.xticks(xmarks, rotation = 90)
+    plt.tight_layout()
     plt.savefig('psar.png', dpi = 150)

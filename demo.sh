@@ -1,4 +1,14 @@
-workdir='/Users/elisa/Dropbox/Research/Topics/Forex' # set this to where you want the EPS files to go
+workdir='/elisa/Dropbox/Research/Topics/Forex' # the data and manuscript location
+
+if [ "$(uname)" == "Darwin" ]; then
+    workdir='/Users'${workdir}
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    workdir='/home'${workdir}
+else
+    echo 'I have no plans to use this in Win10'
+    exit
+
+echo $workdir
 python3 demo.py $workdir/eurusd_hour.csv > demo.dat
 python3 heikenashi.py > ha.dat
 python3 avg.py

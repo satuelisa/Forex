@@ -7,6 +7,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 else
     echo 'I have no plans to use this in Win10'
     exit
+fi
 
 echo $workdir
 python3 demo.py $workdir/eurusd_hour.csv > demo.dat
@@ -27,4 +28,14 @@ cd $workdir
 pdflatex --interaction=batchmode schaeffer
 bibtex schaeffer
 pdflatex --interaction=batchmode schaeffer
-open schaeffer.pdf 
+if [ "$(uname)" == "Darwin" ]; then
+    open schaeffer.pdf 
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    evince schaeffer.pdf 
+else
+    echo 'I have no plans to use this in Win10'
+    exit
+fi
+
+
+

@@ -1,6 +1,6 @@
 from math import fabs
 
-thr = [0.01, 0.05, 0.1]
+thr = [0.1, 0.2, 0.3]
 target = dict()
 for t in thr:
     target[t] = open(f'zigzag_{t}.dat', 'w')

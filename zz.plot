@@ -25,10 +25,10 @@ plot 'demo.dat' using 6:5 title 'Closing' with lines lt -1 lw 6 lc rgb '#000000'
 
 set output 'zz_2.eps'
 plot 'demo.dat' using 6:5 title 'Closing' with lines lt -1 lw 6 lc rgb '#000000', \
-     'zigzag_0.05.dat' using 3:2 title 'Half percent' with linespoints lt -1 lw 10 lc rgb '#009900', \
+     'zigzag_0.2.dat' using 3:2 title 'Half percent' with linespoints lt -1 lw 10 lc rgb '#009900', \
 
 set output 'zz_3.eps'
 plot 'demo.dat' using 6:5 title 'Closing' with lines lt -1 lw 6 lc rgb '#000000', \
-     'zigzag_0.01.dat' using 3:2 title 'Tenth of a percent' with linespoints lt -1 lw 10 lc rgb '#0000ff'	
+     'zigzag_0.3.dat' using 3:2 title 'Tenth of a percent' with linespoints lt -1 lw 10 lc rgb '#0000ff'	
 
 

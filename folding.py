@@ -4,25 +4,7 @@ minima = []
 maxima = []
 up = None
 down = None
-
-import datetime
-
-fmt = '%Y-%m-%d-%H'
-start = datetime.datetime(year = 2017, month = 2, day = 27)
-end = datetime.datetime(year = 2017, month = 3, day = 2)
-sid = 24 * 60**2
-
-def after(t):
-    return datetime.datetime.strptime(date[t], fmt) >= start
-
-def before(t):
-    return datetime.datetime.strptime(date[t], fmt) <= end
-
-def dt(latter, former):
-    dl = datetime.datetime.strptime(date[latter], fmt)
-    df = datetime.datetime.strptime(date[former], fmt)
-    difference = dl - df
-    return difference.days * sid + difference.seconds
+from period import before, after, dt, start, end
 
 plot = open('fold.plot', 'w')
 print('''set term postscript eps color font ",28"
@@ -68,9 +50,9 @@ with open('demo.dat') as data:
                     prev = minima[-2] # the immediate previous local minima
                     y0 = prev[0]
                     t0 = prev[1] 
-                    a = (y1 - y0) / dt(t1, t0) # slope between the two
+                    a = (y1 - y0) / dt(date[t1], date[t0]) # slope between the two
                     if a > 0 and (up is None or a > up[2]):
-                        if after(t1) and before(t1): 
+                        if after(date[t1]) and before(date[t1]): 
                             print(f'set arrow from "{date[t1]}", graph 0 to "{date[t1]}", graph 1 nohead lt -1 dt 3 lw 2 lc rgb "#ff0000"', file = plot)
                         up = t0, y0, a
                 continue                        
@@ -81,36 +63,36 @@ with open('demo.dat') as data:
                     prev = maxima[-2] # the immediate previous local minima
                     y0 = prev[0]
                     t0 = prev[1]
-                    a = (y1 - y0) / dt(t1, t0) # slope between the two
+                    a = (y1 - y0) / dt(date[t1], date[t0]) # slope between the two
                     if a < 0 and (down is None or a < down[2]):
-                        if after(t1) and before(t1):                         
+                        if after(date[t1]) and before(date[t1]):                         
                             print(f'set arrow from "{date[t1]}", graph 0 to "{date[t1]}", graph 1 nohead lt -1 dt 3 lw 2 lc rgb "#00dd00"', file = plot)
                         down = t0, y0, a
                 continue
             assert not (up and down)
             if up is not None:
                 t0, y0, a = up
-                projection = y0 + a * dt(t1, t0)
+                projection = y0 + a * dt(date[t1], date[t0])
                 if projection >= y1:
                     if last is None or t0 > last:
-                        if after(t0):
+                        if after(date[t0]):
                             print(f'set arrow from "{date[t0]}", {y0} to "{date[t1]}", {projection} nohead lt -1 lw 6 lc rgb "#ff0000"', file = plot)
                             print(date[t1], projection, 3, file = ext)
                             print(date[t1], y1, 5, file = ext)
-                        if after(t1) and before(t1):                                                 
+                        if after(date[t1]) and before(date[t1]):                                                 
                             print(f'set arrow from "{date[t1]}", graph 0 to "{date[t1]}", graph 1 nohead lt -1 dt 2 lw 2 lc rgb "#00dd00"', file = plot)
                     up = None
                     last = t1
             if down is not None:
                 t0, y0, a = down
-                projection = y0 + a * dt(t1, t0)
+                projection = y0 + a * dt(date[t1], date[t0])
                 if projection <= y1:
                     if last is None or t0 > last:
-                        if after(t0):
+                        if after(date[t0]):
                             print(f'set arrow from "{date[t0]}", {y0} to "{date[t1]}", {projection} nohead lt -1 lw 6 lc rgb "#00dd00"', file = plot)
                             print(date[t1], projection, 4, file = ext)
                             print(date[t1], y1, 5, file = ext)
-                        if after(t1) and before(t1):                         
+                        if after(date[t1]) and before(date[t1]):                         
                             print(f'set arrow from "{date[t1]}", graph 0 to "{date[t1]}", graph 1 nohead lt -1 dt 2 lw 2 lc rgb "#ff0000"', file = plot)
                     down = None
                     last = t1

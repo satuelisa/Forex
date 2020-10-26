@@ -16,7 +16,7 @@ python3 avg.py
 python3 macd.py > macd.dat
 python3 stochactisosc.py > so.dat
 python3 rsi.py > rsi.dat
-python3 zigzag.py; gnuplot zz.plot
+python3 zigzag.py > zz.plot; gnuplot zz.plot
 gnuplot demo.plot
 grep -v -e '^[[:space:]]*$' demo.dat > noblanks.dat
 python3 psar.py

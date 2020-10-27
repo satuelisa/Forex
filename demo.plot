@@ -17,23 +17,23 @@ set style fill solid noborder
 set yrange [1.24:1.31]
 set ytics 1.25, 0.01
 set output 'demo.eps'
-set xrange ["2010-07-11-12":"2010-07-16-23"]
+set xrange ["2010-07-01-23":"2010-07-31-23"]
 
 set boxwidth 1800 absolute
 
-plot 'demo.dat' using 6:2:3:4:5:($5 < $2 ? -1 : 1) notitle with candlesticks palette lw 3
+plot 'daily.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palette lw 3
 
 set output 'ha.eps'
-plot 'ha.dat' using 6:2:3:4:5:($5 < $2 ? -1 : 1) notitle with candlesticks palette lw 3
+plot 'ha.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palette lw 3
 
 set output 'sma.eps'
-plot 'demo.dat' using 6:2:3:4:5:($5 < $2 ? -1 : 1) notitle with candlesticks palette lw 3, \
+plot 'daily.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palette lw 3, \
      'roll_5.dat' using 1:2 with lines lt 1 dt 1 lw 8 title 'SMA 5', \
      'roll_21.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'SMA 21', \
      'roll_89.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'SMA 89'
 
 set output 'ema.eps'
-plot 'demo.dat' using 6:2:3:4:5:($5 < $2 ? -1 : 1) notitle with candlesticks palette lw 3, \
+plot 'daily.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palette lw 3, \
      'ema_5.dat' using 1:2 with lines lt 1 dt 1 lw 8 title 'EMA 5', \
      'ema_21.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'EMA 21', \
      'ema_89.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'EMA 89'

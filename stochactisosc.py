@@ -2,7 +2,7 @@ closing = []
 low = []
 high = []
 dates = []
-with open('demo.dat') as data:
+with open('daily.dat') as data:
     for line in data:
         data = line.split()
         if len(data) > 0:

@@ -4,7 +4,7 @@ values = []
 prev = None
 pip = 0.0001 # EUR-USD
 span = 100
-with open('demo.dat') as data:
+with open('daily.dat') as data:
     for line in data:
         data = line.split()
         if len(data) > 0: # skip blank lines

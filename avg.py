@@ -1,6 +1,6 @@
 series = []
 dates = []
-with open('demo.dat') as data:
+with open('daily.dat') as data:
     for line in data:
         fields = line.split()
         if len(fields) > 0:

@@ -46,6 +46,9 @@ with open('zzs_fourhour.dat') as data:
             zz4[date] = '' 
         zz4[date] += level + kind # concatenate
 
-complete = set(raw.keys()) & set(sma5.keys()) & set(sma21.keys()) & set(ha.keys())
-for date in complete:
-    print(date, sma5[date], sma21[date], ha[date], zzd.get(date, '44'), zz4.get(date, '44'))
+complete = list(set(raw.keys()) & set(sma5.keys()) & set(sma21.keys()) & set(ha.keys()))
+latest = None
+for date in sorted(complete):
+    latest = zzd[date] if date in zzd else latest
+    if latest is not None:
+        print(date, sma5[date], sma21[date], ha[date], latest, zz4.get(date, '44'))

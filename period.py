@@ -2,8 +2,23 @@ import datetime
 
 fmt = '%Y-%m-%d-%H'
 dfmt = '%Y-%m-%d'
-start = datetime.datetime(year = 2011, month = 5, day = 1)
-end = datetime.datetime(year = 2011, month = 7, day = 30)
+start = None
+end = None
+
+def setStart(y, m, d):
+    global start
+    start = datetime.datetime(year = y, month = m, day = d)
+
+def setEnd(y, m, d):
+    global end
+    end = datetime.datetime(year = y, month = m, day = d)  
+
+def getStart():
+    return start
+
+def getEnd():
+    return end
+    
 sid = 24 * 60**2
 
 def after(t):

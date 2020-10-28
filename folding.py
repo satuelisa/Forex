@@ -3,7 +3,10 @@ minima = []
 maxima = []
 up = None
 down = None
-from period import before, after, dt, start, end
+from period import before, after, dt, getStart, getEnd, setStart, setEnd
+
+setStart(2011, 5, 1)
+setEnd(2011, 7, 30)
 
 plot = open('fold.plot', 'w')
 print('''set term postscript eps color font ",28"
@@ -24,7 +27,7 @@ set xtics rotate by 90 right
 set autoscale xfix
 set datafile missing 'NA'
 set style fill solid noborder''', file = plot)
-print(f'set xrange ["{start:%Y-%m-%d}-01":"{end:%Y-%m-%d}-23"]', file = plot)
+print(f'set xrange ["{getStart():%Y-%m-%d}-01":"{getEnd():%Y-%m-%d}-23"]', file = plot)
 print('''#set yrange [1.048:1.065]
 #set ytics 1.05, 0.01
 unset key

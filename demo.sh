@@ -25,6 +25,7 @@ python3 psar.py
 python3 folding.py; gnuplot fold.plot
 python3 autocor.py $workdir/eurusd_hour.csv
 python3 characterize.py > char.dat
+python3 train.py > $workdir/perf.tex
 cp *.eps $workdir
 # recompile the manuscript (not in the repo)
 cd $workdir 

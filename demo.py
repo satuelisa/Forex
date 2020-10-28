@@ -26,10 +26,12 @@ if simulate: # simulated daily data for testing
 else:
     from sys import argv # use a data file
     import datetime
+    hours = False
     window = 24 # in hours (24 for daily data)
     if len(argv) > 2:
         window = int(argv[2])
-        print(f'# {window}-hour data') 
+        print(f'# {window}-hour data')
+        hours = True
     midnight = datetime.time(hour = 0, minute = 0)
     wl = datetime.timedelta(hours = window)
     with open(argv[1]) as raw:
@@ -51,7 +53,10 @@ else:
                 if window == 24: # daily data cuts off at midnight
                     start = datetime.datetime.combine(date, midnight)
                 if len(bidOpen) > 0: # there was data
-                    print(bidOpen[0], min(bidLow), max(bidHigh), bidClose[-1], t.strftime('%Y-%m-%d-%H'))
+                    if hours:
+                        print(bidOpen[0], min(bidLow), max(bidHigh), bidClose[-1], t.strftime('%Y-%m-%d-%H'))
+                    else: # daily data, round the timestamp to midnight
+                        print(bidOpen[0], min(bidLow), max(bidHigh), bidClose[-1], t.strftime('%Y-%m-%d')  + '-00')
                 # reset the data collectors
                 bidOpen = []
                 bidHigh = []

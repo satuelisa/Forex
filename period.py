@@ -2,8 +2,8 @@ import datetime
 
 fmt = '%Y-%m-%d-%H'
 dfmt = '%Y-%m-%d'
-start = datetime.datetime(year = 2017, month = 2, day = 20)
-end = datetime.datetime(year = 2017, month = 2, day = 24)
+start = datetime.datetime(year = 2011, month = 5, day = 1)
+end = datetime.datetime(year = 2011, month = 7, day = 30)
 sid = 24 * 60**2
 
 def after(t):

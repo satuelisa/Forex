@@ -3,12 +3,13 @@ from period import before, after, start, end
 from sys import argv
 
 filename = argv[1]
-print('''set term postscript eps color
-set size 2, 1
+print('''set term postscript eps color font ",18"
+set size 2, 1.5
 set xlabel 'Time'
 set xdata time
 set timefmt "%Y-%m-%d-%H"
 set format x "%Y-%m-%d %H:00"
+set xtics rotate by 90 right
 set autoscale xfix''')
 print(f'set xrange ["{start:%Y-%m-%d}-01":"{end:%Y-%m-%d}-23"]')
 print('''set key outside Right

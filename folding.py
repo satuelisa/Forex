@@ -25,8 +25,8 @@ set autoscale xfix
 set datafile missing 'NA'
 set style fill solid noborder''', file = plot)
 print(f'set xrange ["{start:%Y-%m-%d}-01":"{end:%Y-%m-%d}-23"]', file = plot)
-print('''set yrange [1.048:1.065]
-set ytics 1.05, 0.01
+print('''#set yrange [1.048:1.065]
+#set ytics 1.05, 0.01
 unset key
 set pointsize 1.2''', file = plot)
 ext = open('extrema.dat', 'w')
@@ -37,11 +37,15 @@ with open('daily.dat') as data:
         if len(data) == 0:
             continue
         t = data[-1]
-        y = float(data[3]) # closing price (could also use the minimum)
+        if not after(t): # process only the intended period
+            continue
+        if not before(t):
+            continue
+        y = float(data[-2]) # closing price 
         past.append((y,  t))
         if len(past) > 2:
             y1, t1 = past[-2]
-            if past[-3][0] > y1 and y1 < y: # the second to last data point was a local minimum 
+            if past[-3][0] > y1 and y1 < y: # the second to last data point was a local minimum
                 print(t1, y1, 1, file = ext)
                 minima.append((y1, t1))                                                            
                 if down is None and len(minima) > 1:
@@ -99,6 +103,6 @@ ext.close()
 print('''show arrow
 set output 'fold.eps'
 set ylabel 'Closing price'
-plot 'noblanks.dat' using 6:5 with lines lt -1 lw 3 lc rgb '#0000ff', \
+plot 'daily.dat' using 5:4 with lines lt -1 lw 3 lc rgb '#0000ff', \
      'extrema.dat' using 1:2:3 with points pt 7 palette''', file = plot)
 plot.close()

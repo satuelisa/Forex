@@ -68,4 +68,4 @@ for date in sorted(complete):
                 skip = True # incomplete data, uncharacterized
                 break
         if not skip:
-            print(date, sma5[date], sma21[date], ha[date], latest, zz4.get(date, '4 4'), forecasts.strip())
+            print(date, sma5[date], sma21[date], ha[date], latest, zz4.get(date, '0 0'), forecasts.strip())

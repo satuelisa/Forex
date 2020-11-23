@@ -24,16 +24,17 @@ if simulate: # simulated daily data for testing
         print(step, opening, low, high, closing, day)
         day += datetime.timedelta(days = 1)
 else:
-    from sys import argv # use a data file
+    from sys import argv, stderr # use a data file
     import datetime
+    skipped = 0
     hours = False
     window = 24 # in hours (24 for daily data)
     if len(argv) > 2:
         window = int(argv[2])
-        print(f'# {window}-hour data')
+        print(f'# {window}-hour data expected')
         hours = True
-    midnight = datetime.time(hour = 0, minute = 0)
-    wl = datetime.timedelta(hours = window)
+        midnight = datetime.time(hour = 0, minute = 0)
+        wl = datetime.timedelta(hours = window)
     with open(argv[1]) as raw:
         raw.readline() # skip header
         start = None
@@ -41,39 +42,43 @@ else:
         for line in raw:
             fields = line.split(',')
             ds = (fields.pop(0)).split('-')
-            y = int(ds.pop(0))
-            m = int(ds.pop(0))
-            d = int(ds.pop(0))
-            h = int(fields.pop(0).split(':')[0])
+            try:
+                y = int(ds.pop(0))
+                m = int(ds.pop(0))
+                d = int(ds.pop(0))
+                o = float(fields.pop(0))
+                h = float(fields.pop(0))
+                l = float(fields.pop(0))
+                c = float(fields.pop(0))
+            except:
+                skipped += 1
+                continue
             date = datetime.date(y, m, d)
-            hour = datetime.time(hour = h, minute = 0)
-            t = datetime.datetime.combine(date, hour)
-            if start is None or (t - start) > wl:
-                start = t
-                if window == 24: # daily data cuts off at midnight
-                    start = datetime.datetime.combine(date, midnight)
-                if len(bidOpen) > 0: # there was data
-                    if hours:
+            if not hours: # daily data
+                print(o, l, h, c, date.strftime('%Y-%m-%d')  + '-00')
+            else:
+                h = int(fields.pop(0).split(':')[0])                
+                hour = datetime.time(hour = h, minute = 0)
+                t = datetime.datetime.combine(date, hour)
+                if start is None or (t - start) > wl:
+                    start = t
+                    if window == 24: # daily data cuts off at midnight
+                        start = datetime.datetime.combine(date, midnight)
+                    if len(bidOpen) > 0: # there was data
                         print(bidOpen[0], min(bidLow), max(bidHigh), bidClose[-1], t.strftime('%Y-%m-%d-%H'))
-                    else: # daily data, round the timestamp to midnight
-                        print(bidOpen[0], min(bidLow), max(bidHigh), bidClose[-1], t.strftime('%Y-%m-%d')  + '-00')
-                # reset the data collectors
-                bidOpen = []
-                bidHigh = []
-                bidLow = []
-                bidClose = []
-                bidChange = []
-                askOpen = []
-                askHigh = []
-                askLow = []
-            bidOpen.append(float(fields.pop(0)))
-            bidHigh.append(float(fields.pop(0)))
-            bidLow.append(float(fields.pop(0)))
-            bidClose.append(float(fields.pop(0)))
-            bidChange.append(float(fields.pop(0))) # ignored for now
-            askOpen.append(float(fields.pop(0)))
-            askHigh.append(float(fields.pop(0)))
-            askLow.append(float(fields.pop(0)))
+                    # reset the data collectors
+                    opening = []
+                    high = []
+                    low = []
+                    closing = []
+                high.append(h)
+                low.append(l)
+                closing.append(c)
+                opening.append(o)
+        if skipped > 0:
+            print(f'Skipped {skipped} lines with incomplete data', file = stderr)
+
+
              
             
     

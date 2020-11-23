@@ -13,7 +13,7 @@ set xtics rotate by 90 right
 set autoscale xfix
 set datafile missing 'NA'
 set style fill solid noborder
-set yrange [1.2:1.31]
+set yrange [1.2:1.35]
 set ytics 1.2, 0.01
 set output 'demo.eps'
 set xrange ["2010-06-15-23":"2010-07-31-23"]
@@ -28,17 +28,17 @@ plot 'ha.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palet
 
 set output 'sma.eps'
 plot 'daily.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palette lw 3, \
-     'roll_5.dat' using 1:2 with lines lt 1 dt 1 lw 8 title 'SMA 5', \
-     'roll_21.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'SMA 21', \
-     'roll_89.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'SMA 89'
+     'sma_3.dat' using 1:2 with lines lt 1 dt 1 lw 8 title 'SMA 5', \
+     'sma_7.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'SMA 21', \
+     'sma_21.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'SMA 89'
 
 set output 'ema.eps'
 plot 'daily.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks palette lw 3, \
-     'ema_5.dat' using 1:2 with lines lt 1 dt 1 lw 8 title 'EMA 5', \
-     'ema_21.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'EMA 21', \
-     'ema_89.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'EMA 89'
+     'ema_3.dat' using 1:2 with lines lt 1 dt 1 lw 8 title 'EMA 5', \
+     'ema_7.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'EMA 21', \
+     'ema_21.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'EMA 89'
 
-set yrange [-0.019:0.0222]
+set yrange [-0.019:0.024]
 set ytics -0.02, 0.01
 set ylabel 'Difference'
 set pointsize 1.5
@@ -52,7 +52,7 @@ set output 'macd_ema.eps'
 plot 'macd.dat' using 1:(stringcolumn(3) eq "ema_diff" ? column(2) : 1/0) title 'Difference' with boxes lc rgb '#000000', \
      '' using 1:(stringcolumn(3) eq "ema_macd" ? column(2) : 1/0) title 'MACD with EMA' with points pt 7 lc rgb '#ff0000'
 
-set yrange[-5:105]
+set yrange[-5:115]
 set ytics 0, 20
 set ylabel 'Stochactic oscillator'
 set pointsize 1.5

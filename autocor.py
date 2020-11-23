@@ -7,14 +7,15 @@ register_matplotlib_converters()
 from sys import argv
 raw = pd.read_csv(argv[1])
 data = raw.head(500)
-p = data['BidClose']
+p = data['Close']
 low = min(p)
 high = max(p)
 span = high - low
 s = pd.Series(p)
 n = len(s)
 r = pd.Series([low + span * random() for i in range(n)])
-t = [pd.to_datetime((d + '-' + h), format = '%Y-%m-%d-%H:%M') for (d, h) in zip(data['Date'], data['Hour'])]
+# t = [pd.to_datetime((d + '-' + h), format = '%Y-%m-%d-%H:%M') for (d, h) in zip(data['Date'], data['Hour'])]
+t = [pd.to_datetime((d), format = '%Y-%m-%d') for d in data['Date']]
 fig, ax = plt.subplots(2, figsize = (8, 6))
 ax[0].plot(t, r, color = 'blue', alpha = 0.3)
 ax[0].plot(t, s, color = 'red')

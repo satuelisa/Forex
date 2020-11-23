@@ -2,8 +2,13 @@ from math import fabs
 from period import before, after, setStart, setEnd, getStart, getEnd
 from sys import argv
 
-setStart(2011, 5, 23)
-setEnd(2011, 5, 27)
+threshold = {3: 0.1,
+             2: 0.05,
+             1: 0.01}
+
+# period to visualize
+setStart(2019, 1, 15)
+setEnd(2019, 2, 15)
 
 filename = argv[1]
 print('''set term postscript eps color font ",18"
@@ -12,19 +17,16 @@ set xlabel 'Time'
 set xdata time
 set timefmt "%Y-%m-%d-%H"
 set format x "%Y-%m-%d %H:00"
-set yrange [1.395:1.430]
-set ytics 1.395, 0.005
+set yrange [1.122:1.152]
+set ytics 1.125, 0.005
 set xtics rotate by 90 right
 set autoscale xfix''')
 print(f'set xrange ["{getStart():%Y-%m-%d}-01":"{getEnd():%Y-%m-%d}-23"]')
 print('''set key outside Right
 set pointsize 0.9''')
 ds = filename.split('.')[0]
-print(f'set output "zz{ds}.eps"')
 print(' set ylabel "Closing price"')
-threshold = {3: 0.1,
-        2: 0.05,
-        1: 0.01}
+print(f'set output "zz{ds}.eps"')
 s = {3: 24, 2: 20, 1: 16}
 hist = dict()
 when = dict()
@@ -35,7 +37,7 @@ labels = dict()
 for kind in threshold:
     hist[kind] = []
     when[kind] = []
-    df[kind] =  open(f'zz_{kind}_{filename}', 'w')
+    df[kind] =  open(f'zz_{kind}.dat', 'w')
 with open(filename) as data:
     for line in data:
         if '#' in line:
@@ -70,22 +72,14 @@ with open(filename) as data:
             prev = curr
 for k in threshold:
     df[k].close()
-with open(f'zzs_{filename}', 'w') as semaphore:
+with open(f'zzs.dat', 'w') as semaphore:
     for loc in labels:
         l = labels[loc]
         if after(loc):
             print(l[1])
         print(f'{loc} {l[0]} {l[-1]}', file = semaphore)
 print('show arrow\nshow label')
-if 'hour' in filename:
-    print('plot "fourhour.dat" using 6:5 title "Closing price" with points lt -1 pt 7 lc rgb "#000000", \\')
-else:
-    print('plot "daily.dat" using 6:5 title "Closing price" with points lt -1 pt 7 lc rgb "#000000", \\')
-print(f'"zz_1_{filename}" using 1:2 title "Smallest threshold" with line lt -1 lw 3 lc rgb "#999900", \\')
-print(f'"zz_2_{filename}" using 1:2 title "Middle threshold" with lines lt -1 lw 5 lc rgb "#009999", \\')
-print(f'"zz_3_{filename}" using 1:2 title "Largest threshold" with lines lt -1 lw 7 lc rgb "#990099"')
-
-
-
-
-
+print('plot "daily.dat" using 5:4 title "Closing price" with points lt -1 pt 7 lc rgb "#000000", \\')
+print('"zz_1.dat" using 1:2 title "Smallest threshold" with line lt -1 lw 3 lc rgb "#999900", \\')
+print('"zz_2.dat" using 1:2 title "Middle threshold" with lines lt -1 lw 5 lc rgb "#009999", \\')
+print('"zz_3.dat" using 1:2 title "Largest threshold" with lines lt -1 lw 7 lc rgb "#990099"')

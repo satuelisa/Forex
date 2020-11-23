@@ -8,11 +8,13 @@ from sklearn.metrics import f1_score
 
 # rewritten from https://fuzzy-rough-learn.readthedocs.io/en/stable/_modules/frlearn/neighbours/preprocessors.html#FRFS
 # to gain access to selected attributes
+
 from frlearn.base import Preprocessor
 from frlearn.neighbours.neighbour_search import KDTree, NNSearch
-from frlearn.utils.np_utils import remove_diagonal
+from frlearn.utils.np_utils import fractional_k, remove_diagonal
 from frlearn.utils.owa_operators import OWAOperator, invadd, deltaquadsigmoid
 from frlearn.utils.t_norms import lukasiewicz
+
 
 class FRFS(Preprocessor):
     def __init__(self, n_features=None, owa_weights: OWAOperator = deltaquadsigmoid(0.2, 1), t_norm=lukasiewicz):
@@ -21,7 +23,9 @@ class FRFS(Preprocessor):
         self.t_norm = t_norm
 
     def process(self, X, y):
-        X_scaled = X / np.std(X, axis=0)
+        scale = np.std(X, axis=0)
+        scale = np.where(scale == 0, 1, scale)
+        X_scaled = X / scale
         R_a = np.minimum(np.maximum(1 - np.abs(X_scaled[:, None, :] - X_scaled), 0), y[:, None, None] != y[:, None])
         POS_A_size = self._POS_size(R_a)
         selected_attributes = np.full(X.shape[-1], False)
@@ -43,7 +47,8 @@ class FRFS(Preprocessor):
 
     def _POS_size(self, R_a):
         R = self.t_norm(R_a, axis=-1)
-        return np.sum(self.owa_weights.soft_min(1 - R, axis=-1))
+        return np.sum(self.owa_weights.soft_min(1 - R, k=fractional_k(1), axis=-1))
+
 # rewriting ends
 
 windows = [3, 5, 7, 14, 21]
@@ -51,7 +56,7 @@ full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A', '
 from collections import defaultdict
 uses = defaultdict(int)
 print('\\begin{{tabular}}{{|ll|r|{}|rr|}}\n\\hline'.format('c' * len(full)))
-print('{\\bf H} & {\\bf T} & {\\bf Score} & ' + ' & '.join('f\\rotatebox{90}{label}' for label in full]), '& \# & $t$ \\\\\n\hline')
+print('{\\bf H} & {\\bf T} & {\\bf Score} & ' + ' & '.join([f'\\rotatebox{{90}}{{{label}}}' for label in full]), '& \# & $t$ \\\\\n\hline')
 from characterize import horizons, thresholds
 for horizon in horizons:
     for change in thresholds:
@@ -84,5 +89,5 @@ for horizon in horizons:
         f1 = f1_score(true, pred, average = 'micro')
         print(horizon, ' & ', change, ' & ', f'{f1:.3f} &', ' & '.join(['\\incl' if x in used else '\\excl' for x in full]), f'& {len(data)} & {time() - start:.3f} \\\\')
     print('\\hline')
-print('\\multicolumn{3}{|r|}{Number of times each feature was selected:} & '  + ' & '.join([str(uses[x]) for x in full]), ' &  & \\\\\nhline\n\\end{tabular}')
+print('\\multicolumn{3}{|r|}{Times selected:} & '  + ' & '.join([str(uses[x]) for x in full]), ' &  & \\\\\n\\hline\n\\end{tabular}')
                                                                                                    

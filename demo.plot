@@ -13,11 +13,11 @@ set xtics rotate by 90 right
 set autoscale xfix
 set datafile missing 'NA'
 set style fill solid noborder
-set yrange [1.2:1.35]
+set yrange [1.24:1.35]
 set ytics 1.2, 0.01
 set output 'demo.eps'
-set xrange ["2010-06-15-23":"2010-07-31-23"]
-set key at "2010-07-25-00", graph 0.2
+set xrange ["2010-07-15-23":"2010-08-30-23"]
+set key at "2010-08-25-00", graph 0.8
 
 set boxwidth 20000 absolute # 4 hrs 1800 approx
 
@@ -38,7 +38,7 @@ plot 'daily.dat' using 5:1:2:3:4:($4 < $1 ? -1 : 1) notitle with candlesticks pa
      'ema_7.dat' using 1:2 with lines lt 2 dt 2 lw 8 title 'EMA 21', \
      'ema_21.dat' using 1:2 with lines lt 3 dt 3 lw 8 title 'EMA 89'
 
-set yrange [-0.019:0.024]
+set yrange [-0.022:0.025]
 set ytics -0.02, 0.01
 set ylabel 'Difference'
 set pointsize 1.5

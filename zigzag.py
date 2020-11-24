@@ -61,13 +61,13 @@ with open(filename) as data:
                             value = hist[k][1]
                             if hist[k][0] > hist[k][1] and hist[k][1] < hist[k][2]:
                                 if labels.get(loc, (0, 0))[0] < k:
-                                    labels[loc] = (k, f'set label "{k}" at "{loc}", {value - offset} font ",{s[k]}" tc rgb "#dd0000"', 0)
                                     if after(loc) and before(loc): # in the plotted range
+                                        labels[loc] = (k, f'set label "{k}" at "{loc}", {value - offset} font ",{s[k]}" tc rgb "#dd0000"', 0)
                                         print(f'set arrow from "{loc}", graph 0 to "{loc}", graph 1 nohead lt -1 dt 3 lw 1 lc rgb "#ff0000"')
                             if hist[k][0] < hist[k][1] and hist[k][1] > hist[k][2]:
                                 if labels.get(loc, (0, 0))[0] < k:
-                                    labels[loc] = (k, f'set label "{k}" at "{loc}", {value + offset} font ",{s[k]}" tc rgb "#009900"', 1)
-                                    if after(loc) and before(loc): # in the plotted range                                    
+                                    if after(loc) and before(loc): # in the plotted range
+                                        labels[loc] = (k, f'set label "{k}" at "{loc}", {value + offset} font ",{s[k]}" tc rgb "#009900"', 1)
                                         print(f'set arrow from "{loc}", graph 0 to "{loc}", graph 1 nohead lt -1 dt 3 lw 1 lc rgb "#00dd00"')
             prev = curr
 for k in threshold:

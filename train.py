@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from time import time
+from sys import argv, stderr
 from collections import defaultdict
 
 from frlearn.neighbours import FRONEC
@@ -76,6 +77,9 @@ for horizon in horizons:
             data = pd.read_csv(f'char_{horizon}_{change}.dat', sep = ' ')
             cols = list(data.columns)
             cols.remove('Date')
+            for exclude in argv[1:]:
+                print('Excluding', exclude, file = stderr)
+                cols = list(filter(lambda x: exclude not in x, cols))
             indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
             classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
             training, testing = train_test_split(data, test_size = 0.3)

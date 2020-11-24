@@ -29,6 +29,8 @@ sort -R char_2_3.dat | head -n 10 > sample.tex
 sed 's/\s\+/ \& /g;s/$/ \\\\/g' sample.tex > $workdir/sample.tex
 echo 'Training' 
 python3 train.py > $workdir/perf.tex
+python3 train.py RSI > $workdir/norsi.tex
+python3 train.py RSI MACD > $workdir/nomacd.tex
 cp *.eps $workdir
 # recompile the manuscript (not in the repo)
 cd $workdir 

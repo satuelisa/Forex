@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 from time import time
+from collections import defaultdict
+
 from frlearn.neighbours import FRONEC
 from frlearn.utils.owa_operators import strict
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
+
+from characterize import horizons, thresholds
 
 # rewritten from https://fuzzy-rough-learn.readthedocs.io/en/stable/_modules/frlearn/neighbours/preprocessors.html#FRFS
 # to gain access to selected attributes
@@ -14,7 +18,6 @@ from frlearn.neighbours.neighbour_search import KDTree, NNSearch
 from frlearn.utils.np_utils import fractional_k, remove_diagonal
 from frlearn.utils.owa_operators import OWAOperator, invadd, deltaquadsigmoid
 from frlearn.utils.t_norms import lukasiewicz
-
 
 class FRFS(Preprocessor):
     def __init__(self, n_features=None, owa_weights: OWAOperator = deltaquadsigmoid(0.2, 1), t_norm=lukasiewicz):
@@ -51,43 +54,62 @@ class FRFS(Preprocessor):
 
 # rewriting ends
 
+replicas = 5
 windows = [3, 5, 7, 14, 21]
-full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A', 'ZZS-level', 'ZZS-kind']
-from collections import defaultdict
-uses = defaultdict(int)
-print('\\begin{{tabular}}{{|ll|r|{}|rr|}}\n\\hline'.format('c' * len(full)))
-print('{\\bf H} & {\\bf T} & {\\bf Score} & ' + ' & '.join([f'\\rotatebox{{90}}{{{label}}}' for label in full]), '& \# & $t$ \\\\\n\hline')
-from characterize import horizons, thresholds
+full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
+print('\\begin{{tabular}}{{|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)))
+print('\multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
+      + ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
+      '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n')
+print('& & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
+      '& & $\mu$ & $\sigma$ \\\\\n\hline')
+total = 0
+usage = defaultdict(int)
 for horizon in horizons:
     for change in thresholds:
-        start = time()
-        data = pd.read_csv(f'char_{horizon}_{change}.dat', sep = ' ')
-        cols = list(data.columns)
-        cols.remove('Date')
-        indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
-        classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
-        training, testing = train_test_split(data, test_size = 0.3)
-        trainData = training[indicators].to_numpy()
-        trainLabels = np.column_stack((training[classes[0]], training[classes[1]]))      
-        scalarLabels = np.asarray([int(f'{row[0]}{row[1]}', 2) for row in trainLabels])
-        used = set()
-        preproc= FRFS()
-        selected = preproc.process(trainData, scalarLabels)
-        trainData = trainData[:, selected]
-        for pos in range(len(selected)):
-            if selected[pos]:
-                i = indicators[pos]
-                used.add(i)
-                uses[i] += 1
-        classifier = FRONEC(k = 10, Q_type = 1, R_d_type = 1)
-        model = classifier.construct(trainData, trainLabels)
-        testData = testing[indicators].to_numpy()
-        testData = testData[:, selected]            
-        pred = [f'{r[0]:.0f}{r[1]:.0f}' for r in np.rint(model.query(testData))]
-        true = [f'{i}{j}' for  (i, j) in zip(testing[classes[0]],
-                                             testing[classes[1]])]
-        f1 = f1_score(true, pred, average = 'micro')
-        print(horizon, ' & ', change, ' & ', f'{f1:.3f} &', ' & '.join(['\\incl' if x in used else '\\excl' for x in full]), f'& {len(data)} & {time() - start:.3f} \\\\')
+        scores = []
+        times = []
+        uses = defaultdict(int)
+        for replica in range(replicas):
+            total += 1
+            start = time()
+            data = pd.read_csv(f'char_{horizon}_{change}.dat', sep = ' ')
+            cols = list(data.columns)
+            cols.remove('Date')
+            indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
+            classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
+            training, testing = train_test_split(data, test_size = 0.3)
+            trainData = training[indicators].to_numpy()
+            trainLabels = np.column_stack((training[classes[0]], training[classes[1]]))      
+            scalarLabels = np.asarray([int(f'{row[0]}{row[1]}', 2) for row in trainLabels])
+            preproc= FRFS()
+            selected = preproc.process(trainData, scalarLabels)
+            trainData = trainData[:, selected]
+            for pos in range(len(selected)):
+                if selected[pos]:
+                    i = indicators[pos]
+                    uses[i] += 1
+            classifier = FRONEC(k = 10, Q_type = 1, R_d_type = 1)
+            model = classifier.construct(trainData, trainLabels)
+            testData = testing[indicators].to_numpy()
+            testData = testData[:, selected]            
+            pred = [f'{r[0]:.0f}{r[1]:.0f}' for r in np.rint(model.query(testData))]
+            true = [f'{i}{j}' for  (i, j) in zip(testing[classes[0]],
+                                                 testing[classes[1]])]
+            f1 = f1_score(true, pred, average = 'micro')
+            scores.append(f1)
+            times.append(time() - start)
+        avg = np.mean(times)
+        sd = np.std(times)
+        high = max(scores)
+        low = min(scores)
+        for i in uses:
+            usage[i] += uses[i]
+        print(horizon, '&', change, '&', f'{low:.2f} & {high:.2f} &', \
+              ' & '.join([str(uses[x]) for x in full]), \
+              f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
     print('\\hline')
-print('\\multicolumn{3}{|r|}{Times selected:} & '  + ' & '.join([str(uses[x]) for x in full]), ' &  & \\\\\n\\hline\n\\end{tabular}')
+print('\\multicolumn{4}{|r|}{\\%} & ' \
+      + ' & '.join([f'{100 * usage[x] / total:.0f}' for x in full]), \
+      ' & \\multicolumn{3}{|l|}{total} \\\\\n\\hline\n\\end{tabular}')
                                                                                                    

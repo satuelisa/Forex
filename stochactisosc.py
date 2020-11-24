@@ -17,7 +17,7 @@ with open('daily.dat') as data:
             high.append(None)
             low.append(None)
 l = 14
-d = 4
+d = 3
 window = []
 missing = 0
 threshold = 48

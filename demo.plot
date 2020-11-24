@@ -45,12 +45,12 @@ set pointsize 1.5
 set key at 30, graph 0.9
 
 set output 'macd_sma.eps'
-plot 'macd.dat' using 1:(stringcolumn(3) eq "sma_diff" ? column(2) : 1/0) title 'Difference' with boxes lc rgb '#000000', \
-     '' using 1:(stringcolumn(3) eq "sma_macd" ? column(2) : 1/0) title 'MACD with EMA' with points pt 7 lc rgb '#ff0000'
+plot 'macd_sma.dat' using 1:(stringcolumn(3) eq "diff" ? column(2) : 1/0) title 'Difference' with boxes lc rgb '#000000', \
+     '' using 1:(stringcolumn(3) eq "macd" ? column(2) : 1/0) title 'MACD with EMA' with points pt 7 lc rgb '#ff0000'
 
 set output 'macd_ema.eps'
-plot 'macd.dat' using 1:(stringcolumn(3) eq "ema_diff" ? column(2) : 1/0) title 'Difference' with boxes lc rgb '#000000', \
-     '' using 1:(stringcolumn(3) eq "ema_macd" ? column(2) : 1/0) title 'MACD with EMA' with points pt 7 lc rgb '#ff0000'
+plot 'macd_ema.dat' using 1:(stringcolumn(3) eq "diff" ? column(2) : 1/0) title 'Difference' with boxes lc rgb '#000000', \
+     '' using 1:(stringcolumn(3) eq "macd" ? column(2) : 1/0) title 'MACD with EMA' with points pt 7 lc rgb '#ff0000'
 
 set yrange[-5:115]
 set ytics 0, 20

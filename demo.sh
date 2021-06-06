@@ -1,9 +1,10 @@
-workdir='/elisa/Dropbox/Research/Topics/Forex' # the data and manuscript location
+workdir='/Dropbox/Research/Topics/Forex' # the data and manuscript location
 
 if [ "$(uname)" == "Darwin" ]; then
-    workdir='/Users'${workdir}
+    # workdir='/Users/elisa'${workdir}
+    workdir='/Volume/dropbox'${workdir}
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    workdir='/home'${workdir}
+    workdir='/home/elisa'${workdir}
 else
     echo 'I have no plans to use this in Win10'
     exit

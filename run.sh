@@ -20,7 +20,7 @@ do
     python3 heikenashi.py $dataset > ha.csv; gnuplot ha.plot
     python3 avg.py $dataset; gnuplot avg.plot
     python3 macd.py $dataset; gnuplot macd.plot
-    python3 stochactisosc.py $dataset > so.csv; gnuplot so.plot
+    python3 stochacticosc.py $dataset > so.csv; gnuplot so.plot
     python3 rsi.py $dataset > rsi.csv; gnuplot rsi.plot
     python3 zigzag.py $dataset > zz.plot; gnuplot zz.plot 2> plot.log
     #grep -v -e '^[[:space:]]*$' demo.csv > noblanks.csv

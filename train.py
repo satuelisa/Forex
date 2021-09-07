@@ -60,6 +60,7 @@ above = 0.8
 replicas = 5
 windows = [3, 5, 7, 14, 21]
 full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
+
 with open('header.tex', 'w') as hdr:
     print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
     print('\multirow{2}{*}{Data set} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
@@ -67,6 +68,9 @@ with open('header.tex', 'w') as hdr:
           '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n', file = hdr)
     print('& & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
           '& & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
+
+with open('footer.tex', 'w') as ftr:
+      print('\\\\\n\\hline\n\\end{tabular}', file = ftr)    
 
 total = 0
 usage = defaultdict(int)
@@ -116,8 +120,6 @@ for horizon in horizons:
             print('{\sc ', dataset, '} &', horizon, '&', change, '&', f'{low:.2f} & {high:.2f} &', \
                   ' & '.join([str(uses[x]) for x in full]), \
                   f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
-    print('\\hline')
-print('\\multicolumn{4}{|r|}{\\%} & ' \
+print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{\\%} & ' \
       + ' & '.join([f'{100 * usage[x] / total:.0f}' for x in full]), \
-      ' & \\multicolumn{3}{|l|}{total} \\\\\n\\hline\n\\end{tabular}')
-                                                                                                   
+      ' & \\multicolumn{3}{|l|}{total}')

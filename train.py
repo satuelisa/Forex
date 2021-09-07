@@ -70,7 +70,7 @@ with open('header.tex', 'w') as hdr:
           '& & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
 
 with open('footer.tex', 'w') as ftr:
-      print('\\\\\n\\hline\n\\end{tabular}', file = ftr)    
+      print('\\hline\n\\end{tabular}', file = ftr)    
 
 total = 0
 usage = defaultdict(int)
@@ -122,4 +122,4 @@ for horizon in horizons:
                   f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
 print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{\\%} & ' \
       + ' & '.join([f'{100 * usage[x] / total:.0f}' for x in full]), \
-      ' & \\multicolumn{3}{|l|}{total}')
+      ' & \\multicolumn{3}{|l|}{total} \\\\')

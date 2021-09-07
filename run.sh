@@ -37,9 +37,15 @@ do
     mv *.csv $workdir/data/$label
     mv *.eps $workdir/data/$label
 done
-cat perf_*.tex | sort > perf.tex
-cat norsi_*.tex | sort > norsi.tex
-cat nomacd_*.tex | sort > nomacd.tex
-cat header.tex perf.tex footer.tex > $workdir/perf.tex
-cat header.tex norsi.tex footer.tex > $workdir/norsi.tex
-cat header.tex nomacd.tex footer.tex > $workdir/nomacd.tex
+
+cat perf_*.tex | sort | grep total > bottom.tex
+cat perf_*.tex | sort | grep -v total > top.tex
+cat header.tex top.tex bottom.tex footer.tex > $workdir/perf.tex
+
+cat norsi_*.tex | sort | grep total > bottom.tex
+cat norsi_*.tex | sort | grep -v total > top.tex
+cat header.tex top.tex bottom.tex footer.tex > $workdir/norsi.tex
+
+cat nomacd_*.tex | sort | grep total > bottom.tex
+cat nomacd_*.tex | sort | grep -v total > top.tex
+cat header.tex top.tex bottom.tex footer.tex > $workdir/nomacd.tex

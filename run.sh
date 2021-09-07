@@ -27,11 +27,11 @@ do
     python3 psar.py $dataset # this one plots within the python script
     python3 folding.py $dataset; gnuplot fold.plot 2> plot.log
     python3 autocor.py $dataset # this one also plots within the python script
-    echo 'Characterizing $dataset' 
+    echo Characterizing $label
     python3 characterize.py $dataset
     sort -R char_2_3.csv | head -n 10 > sample.tex
     sed 's/\s\+/ \& /g;s/$/ \\\\/g' sample.tex > $workdir/sample_$label.tex
-    echo 'Training $dataset' 
+    echo Training $label
     python3 train.py > $workdir/perf_$label.tex
     python3 train.py RSI > $workdir/norsi_$label.tex
     python3 train.py RSI MACD > $workdir/nomacd_$label.tex

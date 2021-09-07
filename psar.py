@@ -2,6 +2,7 @@
 
 # adapted from https://raw.githubusercontent.com/virtualizedfrog/blog_code/master/PSAR/psar.py
 import pandas as pd
+from sys import argv
 from datetime import datetime
 import matplotlib.pyplot as plt
 
@@ -68,8 +69,10 @@ def psar(barsdata, iaf = 0.02, maxaf = 0.2):
 
     return {"dates":dates, "high":high, "low":low, "close":close, "psar":psar, "psarbear":psarbear, "psarbull":psarbull}
 
+
+
 if __name__ == "__main__":
-    raw = pd.read_csv('daily.dat', sep=' ', header = None, names = ['Open', 'Low', 'High', 'Close', 'Date'])
+    raw = pd.read_csv(argv[1])
     barsdata = raw.head(500) # just plot a subset
     # ascending dates are expected in the function
     result = psar(barsdata)

@@ -1,6 +1,6 @@
 import datetime
 
-fmt = '%Y-%m-%d-%H'
+fmt = '%Y-%m-%d'
 dfmt = '%Y-%m-%d'
 start = None
 end = None
@@ -37,6 +37,3 @@ def dt(latter, former):
     df = datetime.datetime.strptime(former, fmt)
     difference = dl - df
     return difference.days * sid + difference.seconds
-
-
-

@@ -1,17 +1,20 @@
 from math import fabs
+from sys import argv
 
 values = []
 prev = None
-pip = 0.0001 # EUR-USD
+pip = {'EUR-USD': 0.0001, 'EUR-JPY': 0.01, 'EUR-CHF': 0.0001, 'USD-JPY': 0.01, 'CAD-USD': 0.0001}
 span = 100
-with open('daily.dat') as data:
+filename = argv[1]
+pair = filename.split('/')[-1].split('.')[0]
+with open(filename) as data:
     for line in data:
-        data = line.split()
+        data = line.split(',')
         if len(data) > 0: # skip blank lines
             curr = float(data[4]) # closing
             if prev is not None:
                 diff = prev - curr
-                change = diff // pip
+                change = diff // pip[pair]
                 if change != 0: # there as a significant change (at least one PIP)
                     values.append(change)
             prev = curr

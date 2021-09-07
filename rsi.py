@@ -1,11 +1,16 @@
+from sys import argv
+
 closing = []
 dates = []
-with open('daily.dat') as data:
+with open(argv[1]) as data:
+    data.readline() # skip header
     for line in data:
-        f = line.split()
+        if 'null' in line:
+            continue # skip incomplete
+        f = line.split(',')
         if len(f) > 0:
-            dates.append(f[-1])
-            closing.append(float(f[-2]))
+            dates.append(f[0])
+            closing.append(float(f[4]))
             assert closing[-1] > 0
         else:
             dates.append(None)
@@ -56,7 +61,8 @@ for t in range(t, n):
             ag = sum(gain) / k
             al = sum(loss) / k
             try:
-                print(dates[t], 100 - (100 / (1 + ((k - 1) * ag + cg) / ((k - 1) * al + cl))))
+                value = 100 - (100 / (1 + ((k - 1) * ag + cg) / ((k - 1) * al + cl)))
+                print(f'{dates[t]},{value}')
                 output = True
                 missing = 0
             except: 

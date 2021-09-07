@@ -74,11 +74,10 @@ for horizon in horizons:
         for replica in range(replicas):
             total += 1
             start = time()
-            data = pd.read_csv(f'char_{horizon}_{change}.dat', sep = ' ')
+            data = pd.read_csv(f'char_{horizon}_{change}.csv')
             cols = list(data.columns)
             cols.remove('Date')
             for exclude in argv[1:]:
-                print('Excluding', exclude, file = stderr)
                 cols = list(filter(lambda x: exclude not in x, cols))
             indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
             classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
@@ -96,7 +95,7 @@ for horizon in horizons:
             classifier = FRONEC(k = 10, Q_type = 1, R_d_type = 1)
             model = classifier.construct(trainData, trainLabels)
             testData = testing[indicators].to_numpy()
-            testData = testData[:, selected]            
+            testData = testData[:, selected]
             pred = [f'{r[0]:.0f}{r[1]:.0f}' for r in np.rint(model.query(testData))]
             true = [f'{i}{j}' for  (i, j) in zip(testing[classes[0]],
                                                  testing[classes[1]])]

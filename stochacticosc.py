@@ -1,16 +1,21 @@
+from sys import argv
+
 closing = []
 low = []
 high = []
 dates = []
-with open('daily.dat') as data:
+with open(argv[1]) as data:
+    data.readline() # skip header row
     for line in data:
-        data = line.split()
+        if 'null' in line:
+            continue # skip incomplete data
+        data = line.split(',')
         if len(data) > 0:
-            dates.append(data[-1])
-            closing.append(float(data[-2]))
+            dates.append(data[0])
+            closing.append(float(data[4]))
             assert closing[-1] > 0 
-            high.append(float(data[-3]))
-            low.append(float(data[-4]))
+            high.append(float(data[2]))
+            low.append(float(data[3]))
         else:
             dates.append(None)
             closing.append(None)
@@ -35,7 +40,7 @@ for t in range(l - 1, len(closing)):
                 window.append(curr)
                 if len(window) > d:
                     window.pop(0)
-                print(dates[t], curr, sum(window) / len(window))
+                print(f'{dates[t]},{curr},{sum(window) / len(window)}')
                 output = True
         else:
             missing += 1            

@@ -66,7 +66,7 @@ with open('header.tex', 'w') as hdr:
     print('\multirow{2}{*}{Data set} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
           + ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
           '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n', file = hdr)
-    print('& & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
+    print('& & & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
           '& & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
 
 with open('footer.tex', 'w') as ftr:

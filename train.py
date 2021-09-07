@@ -55,15 +55,19 @@ class FRFS(Preprocessor):
 
 # rewriting ends
 
+dataset = argv[1]
+above = 0.8
 replicas = 5
 windows = [3, 5, 7, 14, 21]
 full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
-print('\\begin{{tabular}}{{|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)))
-print('\multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
-      + ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
-      '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n')
-print('& & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
-      '& & $\mu$ & $\sigma$ \\\\\n\hline')
+with open('header.tex', 'w') as hdr:
+    print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
+    print('\multirow{2}{*}{Data set} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
+          + ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
+          '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n', file = hdr)
+    print('& & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
+          '& & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
+
 total = 0
 usage = defaultdict(int)
 for horizon in horizons:
@@ -77,7 +81,7 @@ for horizon in horizons:
             data = pd.read_csv(f'char_{horizon}_{change}.csv')
             cols = list(data.columns)
             cols.remove('Date')
-            for exclude in argv[1:]:
+            for exclude in argv[2:]:
                 cols = list(filter(lambda x: exclude not in x, cols))
             indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
             classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
@@ -108,9 +112,10 @@ for horizon in horizons:
         low = min(scores)
         for i in uses:
             usage[i] += uses[i]
-        print(horizon, '&', change, '&', f'{low:.2f} & {high:.2f} &', \
-              ' & '.join([str(uses[x]) for x in full]), \
-              f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
+        if high >= above:
+            print('{\sc ', dataset, '} &', horizon, '&', change, '&', f'{low:.2f} & {high:.2f} &', \
+                  ' & '.join([str(uses[x]) for x in full]), \
+                  f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
     print('\\hline')
 print('\\multicolumn{4}{|r|}{\\%} & ' \
       + ' & '.join([f'{100 * usage[x] / total:.0f}' for x in full]), \

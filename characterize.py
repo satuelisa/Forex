@@ -92,7 +92,7 @@ if __name__ == "__main__":
     for w in windows:
         complete = complete & set(sma[w].keys())
         complete = complete & set(ema[w].keys())
-    indicators = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A,ZZS-level,ZZS-kind,SO,RSI,MACD-SMA,MACD-EMA']
+    indicators = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA,ZZS-level,ZZS-kind,SO,RSI,MACD-SMA,MACD-EMA']
     for td in horizons:
         for thr in thresholds:
             with open(f'char_{td}_{thr}.csv', 'w') as output:

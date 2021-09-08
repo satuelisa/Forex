@@ -33,6 +33,7 @@ do
     python3 train.py $label > perf_$label.tex
     python3 train.py $label RSI > norsi_$label.tex
     python3 train.py $label RSI MACD > nomacd_$label.tex
+    python3 train.py $label EMA ZZS HA MACD SO > small_$label.tex # RSI and SMAs only
     mkdir -p $workdir/data/$label
     mv *.csv $workdir/data/$label
     mv *.eps $workdir/data/$label
@@ -49,6 +50,10 @@ cat header.tex top.tex sep.tex bottom2.tex footer.tex > $workdir/norsi.tex
 cat nomacd_*.tex | sort | grep total > bottom3.tex
 cat nomacd_*.tex | sort | grep -v total > top.tex
 cat header.tex top.tex sep.tex bottom3.tex footer.tex > $workdir/nomacd.tex
+
+cat small_*.tex | sort | grep total > bottom4.tex
+cat small_*.tex | sort | grep -v total > top.tex
+cat small.tex top.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
 
 python3 comp.py > comp.csv
 Rscript comp.R

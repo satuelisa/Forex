@@ -1,25 +1,29 @@
 from collections import defaultdict
 
-total = 5 * 7 * 5 * 30 # 5 pairs, 7 horizons, 5 thresholds, 30 replicas
-
 features = dict()
-combos = [1, 2, 3]
+combos = [1, 2, 3, 4]
+pairs = None
 for d in combos:
     features[d] = defaultdict(list)
     with open(f'bottom{d}.tex') as data:
+        c = 0
         for line in data:
             fields = line.split(' & ')
             pos = 1
             for f in fields[2:-1]:
+                # get the average over the 30 replicas
                 features[d][pos].append(int(f))
                 pos += 1
-
+            c += 1
+        pairs = c if pairs is None else pairs
+        assert pairs == c
 
 print('Indicator,Percentage,Experiment')
 for f in range(1, 18):
     for d in combos:
         values = features[d].get(f, [])
-        perc = 100 * sum(values) / total
+        perc = sum(values) / pairs
+        assert perc >= 0 and perc <= 100
         print(f'{f},{perc},{d}')
 
 #1 89 1

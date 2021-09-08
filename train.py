@@ -111,7 +111,7 @@ for horizon in horizons:
                                                  testing[classes[1]])]
             f1 = f1_score(true, pred, average = 'micro')
             scores.append(f1)
-            times.append(time() - start)
+            times.append(1000 * (time() - start)) # milliseconds
         avg = np.mean(times)
         sd = np.std(times)
         high = max(scores)

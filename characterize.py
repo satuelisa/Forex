@@ -1,12 +1,15 @@
 from period import postpone
 from avg import windows
 from math import fabs
+from time import time
 from sys import argv
 
 horizons = [1, 2, 3, 4, 7, 14, 21] # forecast horizon in days
 thresholds = [x for x in range(1, 10, 2)] # % change in closing price
 
 if __name__ == "__main__":
+    print('Characterization begins')
+    start = time()
     raw = dict()
     with open(argv[1]) as data:
         data.readline() # skip header
@@ -113,3 +116,4 @@ if __name__ == "__main__":
                             ss = ','.join([str(sma[w][date]) for w in windows])
                             es = ','.join([str(ema[w][date]) for w in windows])                            
                             print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecasts}', file = output)
+    print(f'Characterization concluded after {time() - start} seconds')

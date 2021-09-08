@@ -1,3 +1,5 @@
+# USAGE: bash run.sh > log.txt
+
 workdir='/Dropbox/Research/Topics/Forex' # manuscript location
 
 if [ "$(uname)" == "Darwin" ]; then
@@ -15,6 +17,11 @@ do
     echo $dataset
     label=`basename $dataset .csv`
     echo $label
+    # additional indicators that are not presently 
+    python3 psar.py $dataset # this one plots within the python script
+    python3 folding.py $dataset; gnuplot fold.plot 2> plot.log
+    python3 autocor.py $dataset # this one also plots within the python script
+    # the indicators used as features
     python3 heikenashi.py $dataset > ha.csv; gnuplot ha.plot 2> plot.log
     python3 avg.py $dataset; gnuplot avg.plot 2> plot.log
     python3 macd.py $dataset; gnuplot macd.plot 2> plot.log
@@ -22,9 +29,6 @@ do
     python3 rsi.py $dataset > rsi.csv; gnuplot rsi.plot 2> plot.log
     python3 zigzag.py $dataset > zz.plot; gnuplot zz.plot 2> plot.log
     #grep -v -e '^[[:space:]]*$' demo.csv > noblanks.csv
-    python3 psar.py $dataset # this one plots within the python script
-    python3 folding.py $dataset; gnuplot fold.plot 2> plot.log
-    python3 autocor.py $dataset # this one also plots within the python script
     echo Characterizing $label
     python3 characterize.py $dataset
     sort -R char_2_3.csv | head -n 10 > sample.tex
@@ -53,7 +57,7 @@ cat header.tex top.tex sep.tex bottom3.tex footer.tex > $workdir/nomacd.tex
 
 cat small_*.tex | sort | grep total > bottom4.tex
 cat small_*.tex | sort | grep -v total > top.tex
-cat small_*.tex top.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
+cat header.tex top.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
 
 python3 comp.py > comp.csv
 Rscript comp.R

@@ -38,14 +38,17 @@ do
     mv *.eps $workdir/data/$label
 done
 
-cat perf_*.tex | sort | grep total > bottom.tex
+
+cat perf_*.tex | sort | grep total > bottom1.tex
 cat perf_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex bottom.tex footer.tex > $workdir/perf.tex
+cat header.tex top.tex bottom1.tex footer.tex > $workdir/perf.tex
 
-cat norsi_*.tex | sort | grep total > bottom.tex
+cat norsi_*.tex | sort | grep total > bottom2.tex
 cat norsi_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex bottom.tex footer.tex > $workdir/norsi.tex
+cat header.tex top.tex bottom2.tex footer.tex > $workdir/norsi.tex
 
-cat nomacd_*.tex | sort | grep total > bottom.tex
+cat nomacd_*.tex | sort | grep total > bottom3.tex
 cat nomacd_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex bottom.tex footer.tex > $workdir/nomacd.tex
+cat header.tex top.tex bottom3.tex footer.tex > $workdir/nomacd.tex
+
+python3 comp.py

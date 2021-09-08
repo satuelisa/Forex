@@ -122,4 +122,4 @@ for horizon in horizons:
                   f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
 print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \
       + ' & '.join([f'{100 * usage[x] / total:.0f}' for x in full]), \
-      ' & \\multicolumn{3}{|l|}{\\phantom{space}} \\\\')
+      ' & \\multicolumn{3}{|l|}{\\phantom{total}} \\\\')

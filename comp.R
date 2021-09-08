@@ -10,6 +10,6 @@ p <- ggplot(data = d, aes(x = Indicator, y = Percentage, fill = Experiment)) +
     theme_minimal() +
     scale_x_discrete(labels = ina) +
     theme(axis.text.x = element_text(angle = 90)) +
-    scale_fill_manual(labels = ena, values = c('#00aa00','#99aa00', '#0099cc'))
+    scale_fill_manual(labels = ena, values = c('#00aa00','#99aa00', '#0099cc', '#9900aa'))
 
 ggsave("comp.png", width = 8, height = 5, dpi = 300)

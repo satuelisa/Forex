@@ -53,7 +53,7 @@ cat header.tex top.tex sep.tex bottom3.tex footer.tex > $workdir/nomacd.tex
 
 cat small_*.tex | sort | grep total > bottom4.tex
 cat small_*.tex | sort | grep -v total > top.tex
-cat small.tex top.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
+cat small_*.tex top.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
 
 python3 comp.py > comp.csv
 Rscript comp.R

@@ -2,4 +2,7 @@
 *.png
 *.csv
 *.dat
+*.tex
+*.log
+*.plot
 *~

@@ -57,9 +57,11 @@ class FRFS(Preprocessor):
 
 dataset = argv[1]
 above = 0.8
-replicas = 5
-windows = [3, 5, 7, 14, 21]
-full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['H-A', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
+underline = 0.9
+emphasize = 0.7
+replicas = 30
+from avg import windows 
+full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
 
 with open('header.tex', 'w') as hdr:
     print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
@@ -117,7 +119,13 @@ for horizon in horizons:
         for i in uses:
             usage[i] += uses[i]
         if high >= above:
-            print('{\sc ', dataset, '} &', horizon, '&', change, '&', f'{low:.2f} & {high:.2f} &', \
+            h = f'{high:.2f}'
+            if high >= underline:
+                h = '\\underline{' + h + '}'
+            l = f'{low:.2f}'
+            if low < emphasize:
+                l = '{\\em ' + l + '}'                
+            print(f'{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
                   ' & '.join([str(uses[x]) for x in full]), \
                   f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
 print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \

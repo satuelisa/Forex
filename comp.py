@@ -1,22 +1,26 @@
 from collections import defaultdict
 
-features = defaultdict(list)
-combos = [1, 2, 3]:
+total = 5 * 7 * 5 * 30 # 5 pairs, 7 horizons, 5 thresholds, 30 replicas
+
+features = dict()
+combos = [1, 2, 3]
 for d in combos:
+    features[d] = defaultdict(list)
     with open(f'bottom{d}.tex') as data:
         for line in data:
             fields = line.split(' & ')
             pos = 1
-            for f in fields:
-                print(pos, f)
-                features[pos].append(f)
+            for f in fields[2:-1]:
+                features[d][pos].append(int(f))
                 pos += 1
-            quit()
 
-for feature in range(1, 18):
+
+print('Indicator,Percentage,Experiment')
+for f in range(1, 18):
     for d in combos:
-        value = features[feature][d]
-        print(d, value, feature)
+        values = features[d].get(f, [])
+        perc = 100 * sum(values) / total
+        print(f'{f},{perc},{d}')
 
 #1 89 1
 #1 65 2

@@ -86,6 +86,7 @@ with open('footer.tex', 'w') as ftr:
 
 total = 0
 usage = defaultdict(int)
+first = True
 for horizon in horizons:
     for change in thresholds:
         scores = []
@@ -96,6 +97,9 @@ for horizon in horizons:
         cols.remove('Date')
         for exclude in exclusion:
             cols = list(filter(lambda x: exclude not in x, cols))
+        if first:
+            print('% INCL', ' '.join(cols))
+            first = False
         indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
         classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
         for replica in range(replicas):

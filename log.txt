@@ -1,0 +1,31 @@
+Target directory is /home/elisa/Dropbox/Research/Topics/Forex
+/home/elisa/Dropbox/Research/Topics/Forex/data/CAD-USD.csv
+CAD-USD
+Characterizing CAD-USD
+Characterization begins
+Characterization concluded after 0.2955288887023926 seconds
+Training CAD-USD
+/home/elisa/Dropbox/Research/Topics/Forex/data/EUR-CHF.csv
+EUR-CHF
+Characterizing EUR-CHF
+Characterization begins
+Characterization concluded after 0.2972981929779053 seconds
+Training EUR-CHF
+/home/elisa/Dropbox/Research/Topics/Forex/data/EUR-JPY.csv
+EUR-JPY
+Characterizing EUR-JPY
+Characterization begins
+Characterization concluded after 0.28627777099609375 seconds
+Training EUR-JPY
+/home/elisa/Dropbox/Research/Topics/Forex/data/EUR-USD.csv
+EUR-USD
+Characterizing EUR-USD
+Characterization begins
+Characterization concluded after 0.27977871894836426 seconds
+Training EUR-USD
+/home/elisa/Dropbox/Research/Topics/Forex/data/JPY-USD.csv
+JPY-USD
+Characterizing JPY-USD
+Characterization begins
+Characterization concluded after 0.29576587677001953 seconds
+Training JPY-USD

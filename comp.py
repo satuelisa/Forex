@@ -1,7 +1,8 @@
 from collections import defaultdict
 
+COUNT = 6 # six experiments
 features = dict()
-combos = [1, 2, 3, 4]
+combos = [i for i in range(1, COUNT + 1)]
 pairs = None
 for d in combos:
     features[d] = defaultdict(list)
@@ -11,8 +12,8 @@ for d in combos:
             fields = line.split(' & ')
             pos = 1
             for f in fields[2:-1]:
-                # get the average over the 30 replicas
-                features[d][pos].append(int(f))
+                if '-' not in f:
+                    features[d][pos].append(int(f))
                 pos += 1
             c += 1
         pairs = c if pairs is None else pairs

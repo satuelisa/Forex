@@ -38,26 +38,36 @@ do
     python3 train.py $label RSI > norsi_$label.tex
     python3 train.py $label RSI MACD > nomacd_$label.tex
     python3 train.py $label EMA ZZS HA MACD SO > small_$label.tex # RSI and SMAs only
+    python3 train.py $label EMA ZZS HA MACD SO SMA > rsi_$label.tex # RSI only
+    python3 train.py $label EMA ZZS HA MACD SO RSI > sma_$label.tex # SMAs only    
     mkdir -p $workdir/data/$label
     mv *.csv $workdir/data/$label
     mv *.eps $workdir/data/$label
 done
 
 cat perf_*.tex | sort | grep total > bottom1.tex
-cat perf_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex sep.tex bottom1.tex footer.tex > $workdir/perf.tex
+cat perf_*.tex | sort | grep -v total > top1.tex
+cat header.tex top1.tex sep.tex bottom1.tex footer.tex > $workdir/perf.tex
 
 cat norsi_*.tex | sort | grep total > bottom2.tex
-cat norsi_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex sep.tex bottom2.tex footer.tex > $workdir/norsi.tex
+cat norsi_*.tex | sort | grep -v total > top2.tex
+cat header.tex top2.tex sep.tex bottom2.tex footer.tex > $workdir/norsi.tex
 
 cat nomacd_*.tex | sort | grep total > bottom3.tex
-cat nomacd_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex sep.tex bottom3.tex footer.tex > $workdir/nomacd.tex
+cat nomacd_*.tex | sort | grep -v total > top3.tex
+cat header.tex top3.tex sep.tex bottom3.tex footer.tex > $workdir/nomacd.tex
 
 cat small_*.tex | sort | grep total > bottom4.tex
-cat small_*.tex | sort | grep -v total > top.tex
-cat header.tex top.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
+cat small_*.tex | sort | grep -v total > top4.tex
+cat header.tex top4.tex sep.tex bottom4.tex footer.tex > $workdir/small.tex
+
+cat rsi_*.tex | sort | grep total > bottom5.tex
+cat rsi_*.tex | sort | grep -v total > top5.tex
+cat header.tex top5.tex sep.tex bottom5.tex footer.tex > $workdir/rsi.tex
+
+cat sma_*.tex | sort | grep total > bottom6.tex
+cat sma_*.tex | sort | grep -v total > top6.tex
+cat header.tex top6.tex sep.tex bottom6.tex footer.tex > $workdir/sma.tex
 
 python3 comp.py > comp.csv
 Rscript comp.R

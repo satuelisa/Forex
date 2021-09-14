@@ -62,6 +62,15 @@ emphasize = 0.7
 replicas = 30
 from avg import windows 
 full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
+exclusion = argv[2:]
+NA = '---'
+skip = set()
+for f in full:
+    for e in exclusion:
+        if f in e:
+            skip.add(f)
+            break
+print('Excluding', skip)
 
 with open('header.tex', 'w') as hdr:
     print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
@@ -70,7 +79,7 @@ with open('header.tex', 'w') as hdr:
           '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n', file = hdr)
     print('& & & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
           '& & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
-
+    
 with open('footer.tex', 'w') as ftr:
       print('\\hline\n\\end{tabular}', file = ftr)    
 
@@ -87,7 +96,7 @@ for horizon in horizons:
             data = pd.read_csv(f'char_{horizon}_{change}.csv')
             cols = list(data.columns)
             cols.remove('Date')
-            for exclude in argv[2:]:
+            for exclude in exclusion:
                 cols = list(filter(lambda x: exclude not in x, cols))
             indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
             classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
@@ -126,8 +135,8 @@ for horizon in horizons:
             if low < emphasize:
                 l = '{\\em ' + l + '}'                
             print(f'{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
-                  ' & '.join([str(uses[x]) for x in full]), \
+                  ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
 print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \
-      + ' & '.join([f'{100 * usage[x] / total:.0f}' for x in full]), \
+      + ' & '.join([f'{100 * usage[x] / total:.0f}' if x not in skip else NA for x in full]), \
       ' & \\multicolumn{3}{|l|}{\\phantom{total}} \\\\')

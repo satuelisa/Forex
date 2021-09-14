@@ -30,7 +30,8 @@ class FRFS(Preprocessor):
         scale = np.std(X, axis=0)
         scale = np.where(scale == 0, 1, scale)
         X_scaled = X / scale
-        R_a = np.minimum(np.maximum(1 - np.abs(X_scaled[:, None, :] - X_scaled), 0), y[:, None, None] != y[:, None])
+        R_a = np.minimum(np.maximum(1 - np.abs(X_scaled[:, None, :] - X_scaled), 0),
+                         y[:, None, None] != y[:, None])
         POS_A_size = self._POS_size(R_a)
         selected_attributes = np.full(X.shape[-1], False)
         remaining_attributes = set(range(X.shape[-1]))
@@ -67,10 +68,10 @@ NA = '---'
 skip = set()
 for f in full:
     for e in exclusion:
-        if f in e:
+        if e in f:
             skip.add(f)
             break
-print('Excluding', skip)
+print('% SKIP', ' '.join(skip))
 
 with open('header.tex', 'w') as hdr:
     print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
@@ -90,21 +91,21 @@ for horizon in horizons:
         scores = []
         times = []
         uses = defaultdict(int)
+        data = pd.read_csv(f'char_{horizon}_{change}.csv')
+        cols = list(data.columns)
+        cols.remove('Date')
+        for exclude in exclusion:
+            cols = list(filter(lambda x: exclude not in x, cols))
+        indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
+        classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
         for replica in range(replicas):
             total += 1
             start = time()
-            data = pd.read_csv(f'char_{horizon}_{change}.csv')
-            cols = list(data.columns)
-            cols.remove('Date')
-            for exclude in exclusion:
-                cols = list(filter(lambda x: exclude not in x, cols))
-            indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
-            classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
             training, testing = train_test_split(data, test_size = 0.3)
             trainData = training[indicators].to_numpy()
             trainLabels = np.column_stack((training[classes[0]], training[classes[1]]))      
             scalarLabels = np.asarray([int(f'{row[0]}{row[1]}', 2) for row in trainLabels])
-            preproc= FRFS()
+            preproc = FRFS()
             selected = preproc.process(trainData, scalarLabels)
             trainData = trainData[:, selected]
             for pos in range(len(selected)):
@@ -127,16 +128,17 @@ for horizon in horizons:
         low = min(scores)
         for i in uses:
             usage[i] += uses[i]
-        if high >= above:
-            h = f'{high:.2f}'
-            if high >= underline:
-                h = '\\underline{' + h + '}'
-            l = f'{low:.2f}'
-            if low < emphasize:
-                l = '{\\em ' + l + '}'                
-            print(f'{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
-                  ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
-                  f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
+        comment = '' if high >= above else '%'
+        
+        h = f'{high:.2f}'
+        if high >= underline:
+            h = '\\underline{' + h + '}'
+        l = f'{low:.2f}'
+        if low < emphasize:
+            l = '{\\em ' + l + '}'                
+        print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
+              ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
+              f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
 print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \
       + ' & '.join([f'{100 * usage[x] / total:.0f}' if x not in skip else NA for x in full]), \
       ' & \\multicolumn{3}{|l|}{\\phantom{total}} \\\\')

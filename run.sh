@@ -63,7 +63,7 @@ cat header.tex top4.tex sep.tex bottom4.tex footer.tex > $workdir/rsisma.tex
 
 cat rsiema_*.tex | sort | grep total > bottom5.tex
 cat rsiema_*.tex | sort | grep -v total > top5.tex
-cat header.tex top5.tex sep.tex bottom5.tex footer.tex > $workdir/rsiematex
+cat header.tex top5.tex sep.tex bottom5.tex footer.tex > $workdir/rsiema.tex
 
 cat sma_*.tex | sort | grep total > bottom6.tex
 cat sma_*.tex | sort | grep -v total > top6.tex

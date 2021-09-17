@@ -16,8 +16,7 @@ echo 'DT scores' > dt.txt
 starttime=$(date +%s.%N)
 for dataset in `ls -1 $workdir/data/*.csv`;
 do
-    echo $dataset
-    label=`basename $dataset .csv`
+    label=`python3 clean.py $dataset`
     echo $label
     # additional indicators that are not presently 
     python3 psar.py $dataset # this one plots within the python script

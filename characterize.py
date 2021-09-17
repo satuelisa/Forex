@@ -1,8 +1,9 @@
-from period import postpone
 from avg import windows
 from math import fabs
 from time import time
 from sys import argv
+import datetime
+from period import fmt, final
 
 horizons = [1, 2, 3, 4, 5, 10, 15] # forecast horizon in trading days
 thresholds = [0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0] # % change in closing price
@@ -11,7 +12,8 @@ if __name__ == "__main__":
     print('Characterization begins')
     start = time()
     raw = dict()
-    with open(argv[1]) as data:
+    filename = argv[1]
+    with open(filename) as data:
         data.readline() # skip header
         for line in data:
             if 'null' not in line: # only complete lines
@@ -106,16 +108,32 @@ if __name__ == "__main__":
                     baseline = float(raw[date])
                     skip = False
                     semaphore = zzs[date] if date in zzs else semaphore
-                    later = raw.get(postpone(date, td, skipWeekends = True), None)
-                    if later is not None: # data for that day not available
+                    beginning = datetime.datetime.strptime(date, fmt)
+                    passed = 0
+                    counter = 1
+                    while passed < td:
+                        current = beginning + datetime.timedelta(days = counter)
+                        horizon = current.strftime(fmt)
+                        counter += 1
+                        if current > final: # out of data range
+                            horizon = None
+                            break
+                        if horizon in raw:
+                            passed += 1
+                    if horizon is not None:
+                        later = raw[horizon]
                         perc = 100 * ((float(later) - baseline) / baseline) 
                         magnitude = 1 * (fabs(perc) >= thr)
                         sign = 1 * (perc > 0)
-                        # three classes: significant increase = 2, significant decrease = 0, neither 1
+                        # three classes
+                        # significant increase = 2
+                        # significant decrease = 0
+                        # neither 1
                         forecast = 2 if magnitude and sign else 0 if magnitude and not sign else 1
                         classes = '1,0,0' if forecast == 0 else '0,1,0' if forecast == 1 else '0,0,1'
+                        
                         ss = ','.join([str(sma[w][date]) for w in windows])
-                        es = ','.join([str(ema[w][date]) for w in windows])                            
+                        es = ','.join([str(ema[w][date]) for w in windows])      
                         print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecast},{classes}', file = output)
                     
     print(f'Characterization concluded after {time() - start} seconds')

@@ -190,21 +190,24 @@ for horizon in horizons:
                     if selected[pos]:
                         fnames.append(full[pos])
                 best = (trainData, labels, testData, expected, fnames)
-        # build and draw a decision tree for the best replica if requested on command line
-        if 'dt' in argv and highscore >= visthr:
+        # build and draw a decision tree for the best replica
+        # if requested on command line and all three classes are present
+        if 'dt' in argv and present == 3 and highscore >= visthr:
             if verbose:
                 print('%%% drawing a decision tree')
-            (train, labels, test, expected, fnames) = best
+            (tr, l, ts, e, f) = best
             dt = DecisionTreeClassifier()
-            model = dt.fit(train, labels)
-            v = dtreeviz(dt, train, labels,
-                         target_name = 'trend',
-                         feature_names = fnames,
-                         class_names = ['decrease', 'stable', 'increase'])
-            v.save(f'{dataset}_{horizon}_{change}.svg')
-            predicted = dt.predict(test)
-            dtf1 = f1_score(expected, predicted, average = 'weighted')
-            print(f'{dataset} {horizon} {change} dt {dtf1} frs {highscore}', file = dt) 
+            try:
+                model = dt.fit(tr, l)
+                v = dtreeviz(dt, tr, l,
+                             target_name = 'trend',
+                             feature_names = f,
+                             class_names = ['decrease', 'stable', 'increase'])
+                v.save(f'{dataset}_{horizon}_{change}.svg')
+                dtf1 = f1_score(e, dt.predict(ts), average = 'weighted')
+                print(f'{dataset} {horizon} {change} dt {dtf1} frs {highscore}', file = dt) 
+            except:
+                pass # no biggie, it was just an optional picture
         if len(scores) > 0:
             fsavg = np.mean(fstimes)
             fssd = np.std(fstimes)
@@ -223,8 +226,8 @@ for horizon in horizons:
                 l = '{\\em ' + l + '}'
             ma = np.mean(absent)
             abs = f'{ma:.2f}' if ma > 0 else '---'
-            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} &', \
-                  f'{counters[0]} & {counters[1]} & {counters[2]} &', \
+            classcounts = ' & '.join([str(counters[i]) if i in counters else '---' for i in [0, 1, 2]])
+            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {classcounts} ', \
                   f'{l} & {h} & {abs} & ', \
                   ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')

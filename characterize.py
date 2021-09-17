@@ -4,7 +4,7 @@ from math import fabs
 from time import time
 from sys import argv
 
-horizons = [1, 2, 3, 4, 7, 14, 21] # forecast horizon in days
+horizons = [1, 2, 4, 8, 16] # forecast horizon in trading days
 thresholds = [x for x in range(1, 10, 2)] # % change in closing price
 
 if __name__ == "__main__":
@@ -106,15 +106,15 @@ if __name__ == "__main__":
                     baseline = float(raw[date])
                     skip = False
                     semaphore = zzs[date] if date in zzs else semaphore
-                    if semaphore is not None:
-                        later = raw.get(postpone(date, td), None)
-                        if later is not None: # data for that day not available
-                            perc = 100 * ((float(later) - baseline) / baseline) 
-                            magnitude = 1 * (fabs(perc) >= thr)
-                            sign = 1 * (perc > 0)
-                            # three classes: significant increase = 2, significant decrease = 0, neither 1
-                            forecast = 2 if magnitude and sign else 0 if magnitude and not sign else 1
-                            ss = ','.join([str(sma[w][date]) for w in windows])
-                            es = ','.join([str(ema[w][date]) for w in windows])                            
-                            print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecast}', file = output)
+                    later = raw.get(postpone(date, td, skipWeekends = True), None)
+                    if later is not None: # data for that day not available
+                        perc = 100 * ((float(later) - baseline) / baseline) 
+                        magnitude = 1 * (fabs(perc) >= thr)
+                        sign = 1 * (perc > 0)
+                        # three classes: significant increase = 2, significant decrease = 0, neither 1
+                        forecast = 2 if magnitude and sign else 0 if magnitude and not sign else 1
+                        ss = ','.join([str(sma[w][date]) for w in windows])
+                        es = ','.join([str(ema[w][date]) for w in windows])                            
+                        print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecast}', file = output)
+                    
     print(f'Characterization concluded after {time() - start} seconds')

@@ -69,7 +69,7 @@ full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA', 'Z
 exclusion = argv[2:]
 NA = '---'
 
-verbose = False # activate more printouts
+verbose = True # activate more printouts
 
 skip = set()
 for f in full:
@@ -125,13 +125,12 @@ for horizon in horizons:
             if success >= goal: # we have enough
                 break
             training, testing = train_test_split(data, test_size = 0.3)
-            expected = testing[labels]
+            expected = [ l for l in testing[labels] ] # a simple list
             ptest = np.bincount(expected)
             ptrain = np.bincount(training[labels])
             if min(len(ptest), len(ptrain)) < 3:
                 print(f'% SKIP {horizon} {change} has {ptest} {ptrain} class counts in a replica, {presence}')
                 continue
-            success += 1 # a functional replica
             trainData = training[indicators].to_numpy()
             n = len(training)
             # the classifier wants a matrix, not a vector
@@ -142,7 +141,7 @@ for horizon in horizons:
             preproc = FRFS()
             selected = preproc.process(trainData, trainLabels)
             fstimes.append(1000 * (time() - start)) # ms
-            trainData = trainData[:, selected]
+            trainData = trainData[:, selected] # apply the result of the feature selection 
             if verbose:
                 print(f'%%% Training a classifier for a {horizon}-{change} replica')            
             start = time()
@@ -153,7 +152,12 @@ for horizon in horizons:
             testData = testData[:, selected]
             if verbose:
                 print(f'%%% Computing the score for a {horizon}-{change} replica')                        
-            predicted = model.query(testData)
+            predicted = model.query(testData).flatten().tolist() # as a list
+            variety = np.bincount(predicted)
+            if len(variety) == 1 or min(variety) == 0:
+                print(f'%%% REJECT single-class results', variety)
+                continue
+            success += 1 # a functional replica
             f1 = f1_score(expected, predicted, average = 'weighted')
             scores.append(f1)
             for pos in range(len(selected)): # update the usage counters

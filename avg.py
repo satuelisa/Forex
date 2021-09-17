@@ -1,6 +1,6 @@
 from sys import argv
 
-windows = [3, 5, 7, 14, 21]            
+windows = [3, 5, 7, 9, 11]            
 
 if __name__ == '__main__':
     series = []

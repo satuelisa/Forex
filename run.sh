@@ -13,6 +13,7 @@ else
 fi
 echo Target directory is $workdir
 echo 'DT scores' > dt.txt
+starttime=$(date +%s.%N)
 for dataset in `ls -1 $workdir/data/*.csv`;
 do
     echo $dataset
@@ -49,6 +50,11 @@ do
     echo Training $label with only SMA
     python3 train.py $label EMA ZZS HA MACD SO RSI > sma_$label.tex dt
 done
+endtime=$(date +%s.%N)
+duration=$((end-start))
+echo The process took $duration seconds
+
+# build the LaTeX tables of the results
 
 cat perf_*.tex | sort | grep total > bottom1.tex
 cat perf_*.tex | sort | grep -v total > top1.tex
@@ -74,9 +80,13 @@ cat sma_*.tex | sort | grep total > bottom6.tex
 cat sma_*.tex | sort | grep -v total > top6.tex
 cat header.tex top6.tex sep.tex bottom6.tex footer.tex > $workdir/sma.tex
 
+# draw the bar chart of the usage frequency
+
 python3 comp.py > comp.csv
 Rscript comp.R
 cp comp.png $workdir
+
+# convert the decision trees into EPS for the manuscript
 
 for vis in `ls -1 *.svg`;
 do

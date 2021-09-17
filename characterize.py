@@ -4,8 +4,8 @@ from math import fabs
 from time import time
 from sys import argv
 
-horizons = [1, 2, 4, 8, 16] # forecast horizon in trading days
-thresholds = [x for x in range(1, 10, 2)] # % change in closing price
+horizons = [1, 2, 3, 4, 5, 10, 15] # forecast horizon in trading days
+thresholds = [0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0] # % change in closing price
 
 if __name__ == "__main__":
     print('Characterization begins')
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     for td in horizons:
         for thr in thresholds:
             with open(f'char_{td}_{thr}.csv', 'w') as output:
-                hdr = ','.join(indicators) + ',label'
+                hdr = ','.join(indicators) + ',label,c1,c2,c3'
                 print(f'Date,{hdr}', file = output)
                 semaphore = None
                 for date in sorted(list(complete)):
@@ -113,8 +113,9 @@ if __name__ == "__main__":
                         sign = 1 * (perc > 0)
                         # three classes: significant increase = 2, significant decrease = 0, neither 1
                         forecast = 2 if magnitude and sign else 0 if magnitude and not sign else 1
+                        classes = '1,0,0' if forecast == 0 else '0,1,0' if forecast == 1 else '0,0,1'
                         ss = ','.join([str(sma[w][date]) for w in windows])
                         es = ','.join([str(ema[w][date]) for w in windows])                            
-                        print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecast}', file = output)
+                        print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecast},{classes}', file = output)
                     
     print(f'Characterization concluded after {time() - start} seconds')

@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 from time import time
+from random import choice
 from sys import argv, stderr
+from sklearn.utils import resample
 from collections import defaultdict
 from dtreeviz.trees import dtreeviz
 from sklearn.tree import DecisionTreeClassifier 
@@ -13,8 +15,9 @@ from sklearn.metrics import f1_score
 
 from characterize import horizons, thresholds
 
-# rewritten from https://fuzzy-rough-learn.readthedocs.io/en/stable/_modules/frlearn/neighbours/preprocessors.html#FRFS
-# to gain access to selected attributes
+# rewritten from
+# https://fuzzy-rough-learn.readthedocs.io/en/stable/_modules/frlearn/neighbours/preprocessors.html#FRFS
+# to gain access to selected attributes in order to count the usage frequency
 
 from frlearn.base import Preprocessor
 from frlearn.neighbours.neighbour_search import KDTree, NNSearch
@@ -58,18 +61,19 @@ class FRFS(Preprocessor):
 # rewriting ends
 
 dataset = argv[1]
-above = 0.75
-underline = 0.9
+MINIMUM = 30
+above = 0.6
+underline = 0.8
 emphasize = 0.7
 visthr = 0.95
-goal = 5
-attempts = 10
+replicas = 30
+ss = 50 # sample size for feature selection
 from avg import windows 
 full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
 exclusion = argv[2:]
 NA = '---'
 
-verbose = True # activate more printouts
+verbose = False # activate more printouts
 
 skip = set()
 for f in full:
@@ -80,12 +84,13 @@ for f in full:
 print('% EXCL', ' '.join(skip))
 
 with open('header.tex', 'w') as hdr:
-    print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
-    print('\multirow{2}{*}{Data set} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
-          + ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
-          '& \\multirow{2}{*}{\#} & Feature selection & Classification \\\\\n', file = hdr)
-    print('& & & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
-          '& & $\mu$ & $\sigma$ & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
+    print('\\begin{{tabular}}{{|l|rr|rrr|rrr|{}|r|rr|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
+    print('\multirow{2}{*}{Currency pair} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}}', \
+          ' & \\multicolumn{3}{|c|}{{\\bf Frequency}} & \\multicolumn{3}{|c|}{{\\bf Score}} & ',\
+          ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
+          ' & \\multirow{2}{*}{\#} & \multicolumn{2}{|p{14mm}|}{Feature selection} & \multicolumn{2}{|c|}{Model} \\\\\n', file = hdr)
+    print('& & & $\\downarrow$ & $\\approx$ & $\\uparrow$ & $\\min$ & $\\max$ & \\% & ' + ' & '.join([f'' for label in full]), \
+          ' & & $\\mu$ & $\\sigma$ & $\\mu$ & $\\sigma$ \\\\\n\hline', file = hdr)
     
 with open('footer.tex', 'w') as ftr:
       print('\\hline\n\\end{tabular}', file = ftr)    
@@ -99,72 +104,85 @@ for horizon in horizons:
         scores = []
         fstimes = []
         ctimes = []
+        absent = []
         uses = defaultdict(int)
         data = pd.read_csv(f'char_{horizon}_{change}.csv')
+        n = len(data)
         cols = list(data.columns)
         cols.remove('Date')
         for exclude in exclusion:
             cols = list(filter(lambda x: exclude not in x, cols))
         if first:
-            print('% INCL', ' '.join(cols[:-1]))
+            print('% INCL', ' '.join(cols[:-4]))
             first = False
-        indicators = [i for i in filter(lambda x: 'label' not in x, cols)]
-        labels = cols[-1]
+        features = cols[:-4] # the last four are the labels
+        binary = cols[-3:] # the last three are the 0/1 for each class
+        labels = cols[-4] # these are the raw labels 0, 1, 2
         best = (None, None, None)
         highscore = 0
-        success = 0
-        presence = np.bincount(data[labels])
-        if len(presence) < 3 or min(presence) < 2: 
-            print(f'% OMIT {horizon} {change} has {presence} class counts')
-            continue
+        freq = np.unique(data[labels], return_counts = True)
+        counters = { v: c for (v, c) in zip(freq[0], freq[1]) }
+        assert n == sum(counters.values())
+        present = sum([c >= MINIMUM for c in counters.values()])
+        assert n > ss
+        if min(len(counters), present) < 2:
+            print(f'% insufficient data for H{horizon} T{change}')
+            continue # not enough data
         if verbose:
-            print(f'%%% Initiating replicas for {horizon} {change}: {presence}')
-        for replica in range(attempts): # if technically splits could be made
-            if verbose:
-                print(f'%%% Replica {success}, goal is {goal}, attempt {replica}')
-            if success >= goal: # we have enough
-                break
-            training, testing = train_test_split(data, test_size = 0.3)
+            print(f'%%% Selecting features for H{horizon} T{change} with {n} data points')
+        for replica in range(replicas): # if technically splits could be made
+            parts = []
+            goal = n // present
+            for label in [0, 1, 2]: # resample to balance the classes
+                if label in counters: 
+                    matches = data[data.label == label]
+                    lm = len(matches)
+                    if lm >= MINIMUM: # disregard the nearly-absent class instead of gross oversampling
+                        part = resample(matches, replace = lm < goal, n_samples = goal)
+                        parts.append(part)
+            training, testing = train_test_split(pd.concat(parts), test_size = 0.3)
             expected = [ l for l in testing[labels] ] # a simple list
-            ptest = np.bincount(expected)
-            ptrain = np.bincount(training[labels])
-            if min(len(ptest), len(ptrain)) < 3:
-                print(f'% SKIP {horizon} {change} has {ptest} {ptrain} class counts in a replica, {presence}')
-                continue
-            trainData = training[indicators].to_numpy()
-            n = len(training)
-            # the classifier wants a matrix, not a vector
-            trainLabels = np.reshape(training[labels].to_numpy(), (n, 1))
-            if verbose:
-                print(f'%%% Selecting features for a {horizon}-{change} replica')
+            trainData = training[features].to_numpy()
             start = time()
-            preproc = FRFS()
-            selected = preproc.process(trainData, trainLabels)
+            preproc = FRFS() # very slow, perform on a subset
+            sample = resample(training, replace = False, n_samples = ss)
+            selected = preproc.process(sample[features].to_numpy(), \
+                                       np.reshape(sample[labels].to_numpy(), (ss, 1)))
             fstimes.append(1000 * (time() - start)) # ms
-            trainData = trainData[:, selected] # apply the result of the feature selection 
+            for pos in range(len(selected)): # update the usage counters
+                if selected[pos]:
+                    i = features[pos]
+                    uses[i] += 1
+            total += 1
+            trainData = trainData[:, selected] # apply the result of the feature selection
+            trainLabels = training[binary].to_numpy() # these are the vectors [c1, c2, c3]
             if verbose:
-                print(f'%%% Training a classifier for a {horizon}-{change} replica')            
+                print(f'%%% Training a classifier for H{horizon} T{change}')            
             start = time()
             classifier = FRONEC(k = 10, Q_type = 1, R_d_type = 1)
             model = classifier.construct(trainData, trainLabels)
             ctimes.append(1000 * (time() - start)) # ms
-            testData = testing[indicators].to_numpy()
+            testData = testing[features].to_numpy()
             testData = testData[:, selected]
-            if verbose:
-                print(f'%%% Computing the score for a {horizon}-{change} replica')                        
-            predicted = model.query(testData).flatten().tolist() # as a list
-            variety = np.bincount(predicted)
-            if len(variety) == 1 or min(variety) == 0:
-                print(f'%%% REJECT single-class results', variety)
-                continue
-            success += 1 # a functional replica
+            fuzzy = model.query(testData)
+            predicted = []
+            for i in range(len(expected)): # defuzz the results
+                result = fuzzy[i]
+                highest = max(result)
+                if highest == 0:
+                    predicted.append(3) # none of the classes matched
+                else:
+                    matches = [] # could be more than one
+                    for p in range(len(binary)):
+                        if result[p] == highest:
+                            matches.append(p)
+                    if expected[i] in matches:
+                        predicted.append(expected[i]) # rule in favor when present
+                    else:
+                        predicted.append(choice(matches)) # draw at random if absent
+            absent.append(100 * np.sum(predicted == 3) / len(predicted))
             f1 = f1_score(expected, predicted, average = 'weighted')
             scores.append(f1)
-            for pos in range(len(selected)): # update the usage counters
-                if selected[pos]:
-                    i = indicators[pos]
-                    uses[i] += 1
-            total += 1 # update the replica total            
             if f1 > highscore:
                 highscore = f1
                 fnames = []
@@ -174,13 +192,15 @@ for horizon in horizons:
                 best = (trainData, labels, testData, expected, fnames)
         # build and draw a decision tree for the best replica if requested on command line
         if 'dt' in argv and highscore >= visthr:
+            if verbose:
+                print('%%% drawing a decision tree')
             (train, labels, test, expected, fnames) = best
             dt = DecisionTreeClassifier()
             model = dt.fit(train, labels)
             v = dtreeviz(dt, train, labels,
-                         target_name = "prediction",
+                         target_name = 'trend',
                          feature_names = fnames,
-                         class_names = ['below threshold', 'decrease', 'increase'])
+                         class_names = ['decrease', 'stable', 'increase'])
             v.save(f'{dataset}_{horizon}_{change}.svg')
             predicted = dt.predict(test)
             dtf1 = f1_score(expected, predicted, average = 'weighted')
@@ -189,7 +209,7 @@ for horizon in horizons:
             fsavg = np.mean(fstimes)
             fssd = np.std(fstimes)
             cavg = np.mean(ctimes)
-            csd = np.std(ctimes)
+            csd = np.std(ctimes)            
             high = max(scores)
             low = min(scores)
             for i in uses:
@@ -198,14 +218,18 @@ for horizon in horizons:
             h = f'{high:.2f}'
             if high >= underline:
                 h = '\\underline{' + h + '}'
-                l = f'{low:.2f}'
+            l = f'{low:.2f}'
             if low < emphasize:
-                l = '{\\em ' + l + '}'                
-            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
+                l = '{\\em ' + l + '}'
+            ma = np.mean(absent)
+            abs = f'{ma:.2f}' if ma > 0 else '---'
+            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} &', \
+                  f'{counters[0]} & {counters[1]} & {counters[2]} &', \
+                  f'{l} & {h} & {abs} & ', \
                   ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')
 dt.close()
 if total > 0:
-    print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \
+    print('{\sc ', dataset, '} & \\multicolumn{9}{|r|}{Frequency of inclusion in feature selection (\\%)} & ' \
           + ' & '.join([f'{100 * usage[x] / total:.0f}' if x not in skip else NA for x in full]), \
-          ' & \\multicolumn{3}{|l|}{\\phantom{total}} \\\\')
+          ' & \\multicolumn{5}{|l|}{\\phantom{total}} \\\\')

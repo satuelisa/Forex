@@ -113,6 +113,9 @@ if __name__ == "__main__":
                         if later is not None: # data for that day not available
                             perc = 100 * ((float(later) - baseline) / baseline) 
                             forecasts = f'{1 * (fabs(perc) >= thr)},{1 * (perc > 0)}'
+                            # three classes: significant increase, significant decrease, neither
+                            if forecasts == '0,1':
+                                forecasts = '0,0' 
                             ss = ','.join([str(sma[w][date]) for w in windows])
                             es = ','.join([str(ema[w][date]) for w in windows])                            
                             print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecasts}', file = output)

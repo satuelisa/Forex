@@ -3,6 +3,8 @@ import pandas as pd
 from time import time
 from sys import argv, stderr
 from collections import defaultdict
+from dtreeviz.trees import dtreeviz
+from sklearn.tree import DecisionTreeClassifier 
 
 from frlearn.neighbours import FRONEC
 from frlearn.utils.owa_operators import strict
@@ -60,6 +62,7 @@ dataset = argv[1]
 above = 0.8
 underline = 0.9
 emphasize = 0.7
+visthr = 0.95
 replicas = 30
 from avg import windows 
 full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
@@ -102,6 +105,8 @@ for horizon in horizons:
             first = False
         indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
         classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
+        best = None
+        highscore = 0
         for replica in range(replicas):
             total += 1
             start = time()
@@ -124,8 +129,24 @@ for horizon in horizons:
             true = [f'{i}{j}' for  (i, j) in zip(testing[classes[0]],
                                                  testing[classes[1]])]
             f1 = f1_score(true, pred, average = 'micro')
+            if f1 > highscore:
+                highscore = f1
+                best = training
             scores.append(f1)
             times.append(1000 * (time() - start)) # milliseconds
+
+        # build and draw a decision tree for the best if requested on command line
+        if 'dt' in argv and highscore >= visthr:
+            data = best[indicators].to_numpy()
+            vl = np.column_stack((best[classes[0]], best[classes[1]]))
+            labels = np.asarray([int(f'{row[0]}{row[1]}', 2) for row in vl])
+            dt = DecisionTreeClassifier()
+            model = dt.fit(data, labels)
+            v = dtreeviz(dt, data, labels,
+                         target_name = "prediction",
+                         feature_names = full,
+                         class_names = ['below threshold', 'decrease', 'increase'])
+            v.save(f'dt_{dataset}_{horizon}_{change}.svg')
         avg = np.mean(times)
         sd = np.std(times)
         high = max(scores)

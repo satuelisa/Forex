@@ -5,7 +5,6 @@ from random import choice
 from sys import argv, stderr
 from sklearn.utils import resample
 from collections import defaultdict
-from dtreeviz.trees import dtreeviz
 from sklearn.tree import DecisionTreeClassifier 
 
 from frlearn.neighbours import FRONEC
@@ -62,8 +61,8 @@ class FRFS(Preprocessor):
 
 dataset = argv[1]
 MINIMUM = 30
-above = 0.6
-underline = 0.8
+above = 0.7
+underline = 0.9
 emphasize = 0.7
 visthr = 0.95
 replicas = 30
@@ -98,7 +97,6 @@ with open('footer.tex', 'w') as ftr:
 total = 0
 usage = defaultdict(int)
 first = True
-dt = open('dtscores.txt', 'a')
 for horizon in horizons:
     for change in thresholds:
         scores = []
@@ -118,8 +116,6 @@ for horizon in horizons:
         features = cols[:-4] # the last four are the labels
         binary = cols[-3:] # the last three are the 0/1 for each class
         labels = cols[-4] # these are the raw labels 0, 1, 2
-        best = (None, None, None)
-        highscore = 0
         freq = np.unique(data[labels], return_counts = True)
         counters = { v: c for (v, c) in zip(freq[0], freq[1]) }
         assert n == sum(counters.values())
@@ -183,31 +179,6 @@ for horizon in horizons:
             absent.append(100 * np.sum(predicted == 3) / len(predicted))
             f1 = f1_score(expected, predicted, average = 'weighted')
             scores.append(f1)
-            if f1 > highscore:
-                highscore = f1
-                fnames = []
-                for pos in range(len(selected)):
-                    if selected[pos]:
-                        fnames.append(full[pos])
-                best = (trainData, labels, testData, expected, fnames)
-        # build and draw a decision tree for the best replica
-        # if requested on command line and all three classes are present
-        if 'dt' in argv and present == 3 and highscore >= visthr:
-            if verbose:
-                print('%%% drawing a decision tree')
-            (tr, l, ts, e, f) = best
-            dt = DecisionTreeClassifier()
-            try:
-                model = dt.fit(tr, l)
-                v = dtreeviz(dt, tr, l,
-                             target_name = 'trend',
-                             feature_names = f,
-                             class_names = ['decrease', 'stable', 'increase'])
-                v.save(f'{dataset}_{horizon}_{change}.svg')
-                dtf1 = f1_score(e, dt.predict(ts), average = 'weighted')
-                print(f'{dataset} {horizon} {change} dt {dtf1} frs {highscore}', file = dt) 
-            except:
-                pass # no biggie, it was just an optional picture
         if len(scores) > 0:
             fsavg = np.mean(fstimes)
             fssd = np.std(fstimes)
@@ -231,7 +202,6 @@ for horizon in horizons:
                   f'{l} & {h} & {abs} & ', \
                   ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')
-dt.close()
 if total > 0:
     print('{\sc ', dataset, '} & \\multicolumn{9}{|r|}{Frequency of inclusion in feature selection (\\%)} & ' \
           + ' & '.join([f'{100 * usage[x] / total:.0f}' if x not in skip else NA for x in full]), \

@@ -23,7 +23,7 @@ from frlearn.utils.owa_operators import OWAOperator, invadd, deltaquadsigmoid
 from frlearn.utils.t_norms import lukasiewicz
 
 class FRFS(Preprocessor):
-    def __init__(self, n_features=None, owa_weights: OWAOperator = deltaquadsigmoid(0.2, 1), t_norm=lukasiewicz):
+    def __init__(self, n_features = None, owa_weights: OWAOperator = deltaquadsigmoid(0.2, 1), t_norm = lukasiewicz):
         self.n_features = n_features
         self.owa_weights = owa_weights
         self.t_norm = t_norm
@@ -32,8 +32,7 @@ class FRFS(Preprocessor):
         scale = np.std(X, axis=0)
         scale = np.where(scale == 0, 1, scale)
         X_scaled = X / scale
-        R_a = np.minimum(np.maximum(1 - np.abs(X_scaled[:, None, :] - X_scaled), 0),
-                         y[:, None, None] != y[:, None])
+        R_a = np.minimum(np.maximum(1 - np.abs(X_scaled[:, None, :] - X_scaled), 0), y[:, None, None] != y[:, None])
         POS_A_size = self._POS_size(R_a)
         selected_attributes = np.full(X.shape[-1], False)
         remaining_attributes = set(range(X.shape[-1]))
@@ -59,30 +58,34 @@ class FRFS(Preprocessor):
 # rewriting ends
 
 dataset = argv[1]
-above = 0.8
+above = 0.75
 underline = 0.9
 emphasize = 0.7
 visthr = 0.95
-replicas = 30
+goal = 5
+attempts = 10
 from avg import windows 
 full = [f'SMA-{w}' for w in windows] + [f'EMA-{w}' for w in windows] + ['HA', 'ZZS-level', 'ZZS-kind', 'SO', 'RSI', 'MACD-SMA', 'MACD-EMA']
 exclusion = argv[2:]
 NA = '---'
+
+verbose = False # activate more printouts
+
 skip = set()
 for f in full:
     for e in exclusion:
         if e in f:
             skip.add(f)
             break
-print('% SKIP', ' '.join(skip))
+print('% EXCL', ' '.join(skip))
 
 with open('header.tex', 'w') as hdr:
-    print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
+    print('\\begin{{tabular}}{{|l|ll|rr|{}|r|rr|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
     print('\multirow{2}{*}{Data set} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}} & \\multicolumn{2}{|c|}{{\\bf Score}} & '\
           + ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
-          '& \\multirow{2}{*}{\#} & \multicolumn{2}{|c|}{Runtime} \\\\\n', file = hdr)
+          '& \\multirow{2}{*}{\#} & Feature selection & Classification \\\\\n', file = hdr)
     print('& & & $\\min$ & $\\max$ & ' + ' & '.join([f'' for label in full]), \
-          '& & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
+          '& & $\mu$ & $\sigma$ & $\mu$ & $\sigma$ \\\\\n\hline', file = hdr)
     
 with open('footer.tex', 'w') as ftr:
       print('\\hline\n\\end{tabular}', file = ftr)    
@@ -90,10 +93,12 @@ with open('footer.tex', 'w') as ftr:
 total = 0
 usage = defaultdict(int)
 first = True
+dt = open('dtscores.txt', 'a')
 for horizon in horizons:
     for change in thresholds:
         scores = []
-        times = []
+        fstimes = []
+        ctimes = []
         uses = defaultdict(int)
         data = pd.read_csv(f'char_{horizon}_{change}.csv')
         cols = list(data.columns)
@@ -101,69 +106,102 @@ for horizon in horizons:
         for exclude in exclusion:
             cols = list(filter(lambda x: exclude not in x, cols))
         if first:
-            print('% INCL', ' '.join(cols))
+            print('% INCL', ' '.join(cols[:-1]))
             first = False
-        indicators = [i for i in filter(lambda x: 'HT-' not in x, cols)]
-        classes = [i for i in filter(lambda x: 'HT-' in x, cols)]
-        best = None
+        indicators = [i for i in filter(lambda x: 'label' not in x, cols)]
+        labels = cols[-1]
+        best = (None, None, None)
         highscore = 0
-        for replica in range(replicas):
-            total += 1
-            start = time()
+        success = 0
+        presence = np.bincount(data[labels])
+        if len(presence) < 3 or min(presence) < 2: 
+            print(f'% OMIT {horizon} {change} has {presence} class counts')
+            continue
+        if verbose:
+            print(f'%%% Initiating replicas for {horizon} {change}: {presence}')
+        for replica in range(attempts): # if technically splits could be made
+            if verbose:
+                print(f'%%% Replica {success}, goal is {goal}, attempt {replica}')
+            if success >= goal: # we have enough
+                break
             training, testing = train_test_split(data, test_size = 0.3)
+            expected = testing[labels]
+            ptest = np.bincount(expected)
+            ptrain = np.bincount(training[labels])
+            if min(len(ptest), len(ptrain)) < 3:
+                print(f'% SKIP {horizon} {change} has {ptest} {ptrain} class counts in a replica, {presence}')
+                continue
+            success += 1 # a functional replica
             trainData = training[indicators].to_numpy()
-            trainLabels = np.column_stack((training[classes[0]], training[classes[1]]))      
-            scalarLabels = np.asarray([int(f'{row[0]}{row[1]}', 2) for row in trainLabels])
+            n = len(training)
+            # the classifier wants a matrix, not a vector
+            trainLabels = np.reshape(training[labels].to_numpy(), (n, 1))
+            if verbose:
+                print(f'%%% Selecting features for a {horizon}-{change} replica')
+            start = time()
             preproc = FRFS()
-            selected = preproc.process(trainData, scalarLabels)
+            selected = preproc.process(trainData, trainLabels)
+            fstimes.append(1000 * (time() - start)) # ms
             trainData = trainData[:, selected]
-            for pos in range(len(selected)):
+            if verbose:
+                print(f'%%% Training a classifier for a {horizon}-{change} replica')            
+            start = time()
+            classifier = FRONEC(k = 10, Q_type = 1, R_d_type = 1)
+            model = classifier.construct(trainData, trainLabels)
+            ctimes.append(1000 * (time() - start)) # ms
+            testData = testing[indicators].to_numpy()
+            testData = testData[:, selected]
+            if verbose:
+                print(f'%%% Computing the score for a {horizon}-{change} replica')                        
+            predicted = model.query(testData)
+            f1 = f1_score(expected, predicted, average = 'weighted')
+            scores.append(f1)
+            for pos in range(len(selected)): # update the usage counters
                 if selected[pos]:
                     i = indicators[pos]
                     uses[i] += 1
-            classifier = FRONEC(k = 10, Q_type = 1, R_d_type = 1)
-            model = classifier.construct(trainData, trainLabels)
-            testData = testing[indicators].to_numpy()
-            testData = testData[:, selected]
-            pred = [f'{r[0]:.0f}{r[1]:.0f}' for r in np.rint(model.query(testData))]
-            true = [f'{i}{j}' for  (i, j) in zip(testing[classes[0]],
-                                                 testing[classes[1]])]
-            f1 = f1_score(true, pred, average = 'micro')
+            total += 1 # update the replica total            
             if f1 > highscore:
                 highscore = f1
-                best = training
-            scores.append(f1)
-            times.append(1000 * (time() - start)) # milliseconds
-
-        # build and draw a decision tree for the best if requested on command line
+                fnames = []
+                for pos in range(len(selected)):
+                    if selected[pos]:
+                        fnames.append(full[pos])
+                best = (trainData, labels, testData, expected, fnames)
+        # build and draw a decision tree for the best replica if requested on command line
         if 'dt' in argv and highscore >= visthr:
-            data = best[indicators].to_numpy()
-            vl = np.column_stack((best[classes[0]], best[classes[1]]))
-            labels = np.asarray([int(f'{row[0]}{row[1]}', 2) for row in vl])
+            (train, labels, test, expected, fnames) = best
             dt = DecisionTreeClassifier()
-            model = dt.fit(data, labels)
-            v = dtreeviz(dt, data, labels,
+            model = dt.fit(train, labels)
+            v = dtreeviz(dt, train, labels,
                          target_name = "prediction",
-                         feature_names = full,
+                         feature_names = fnames,
                          class_names = ['below threshold', 'decrease', 'increase'])
-            v.save(f'dt_{dataset}_{horizon}_{change}.svg')
-        avg = np.mean(times)
-        sd = np.std(times)
-        high = max(scores)
-        low = min(scores)
-        for i in uses:
-            usage[i] += uses[i]
-        comment = '' if high >= above else '%'
-        
-        h = f'{high:.2f}'
-        if high >= underline:
-            h = '\\underline{' + h + '}'
-        l = f'{low:.2f}'
-        if low < emphasize:
-            l = '{\\em ' + l + '}'                
-        print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
-              ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
-              f'& {len(data):,} & {avg:.2f} & {sd:.2f} \\\\')
-print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \
-      + ' & '.join([f'{100 * usage[x] / total:.0f}' if x not in skip else NA for x in full]), \
-      ' & \\multicolumn{3}{|l|}{\\phantom{total}} \\\\')
+            v.save(f'{dataset}_{horizon}_{change}.svg')
+            predicted = dt.predict(test)
+            dtf1 = f1_score(expected, predicted, average = 'weighted')
+            print(f'{dataset} {horizon} {change} dt {dtf1} frs {highscore}', file = dt) 
+        if len(scores) > 0:
+            fsavg = np.mean(fstimes)
+            fssd = np.std(fstimes)
+            cavg = np.mean(ctimes)
+            csd = np.std(ctimes)
+            high = max(scores)
+            low = min(scores)
+            for i in uses:
+                usage[i] += uses[i]
+            comment = '' if high >= above else '%'
+            h = f'{high:.2f}'
+            if high >= underline:
+                h = '\\underline{' + h + '}'
+                l = f'{low:.2f}'
+            if low < emphasize:
+                l = '{\\em ' + l + '}'                
+            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {l} & {h} &', \
+                  ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
+                  f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')
+dt.close()
+if total > 0:
+    print('{\sc ', dataset, '} & \\multicolumn{4}{|r|}{Feature frequency (\\%)} & ' \
+          + ' & '.join([f'{100 * usage[x] / total:.0f}' if x not in skip else NA for x in full]), \
+          ' & \\multicolumn{3}{|l|}{\\phantom{total}} \\\\')

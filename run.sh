@@ -12,6 +12,7 @@ else
     exit
 fi
 echo Target directory is $workdir
+echo 'DT scores' > dt.txt
 for dataset in `ls -1 $workdir/data/*.csv`;
 do
     echo $dataset
@@ -31,18 +32,22 @@ do
     #grep -v -e '^[[:space:]]*$' demo.csv > noblanks.csv
     echo Characterizing $label
     python3 characterize.py $dataset
+    mkdir -p $workdir/data/$label
+    cp *.csv $workdir/data/$label
     sort -R char_2_3.csv | head -n 10 > sample.tex
     sed 's/\s\+/ \& /g;s/$/ \\\\/g' sample.tex > $workdir/sample_$label.tex
-    echo Training $label
+    echo Training $label with all the features
     python3 train.py $label > perf_$label.tex
+    echo Training $label without RSI
     python3 train.py $label RSI > norsi_$label.tex
+    echo Training $label without RSI and MACD    
     python3 train.py $label RSI MACD > nomacd_$label.tex
-    python3 train.py $label EMA ZZS HA MACD SO > rsisma_$label.tex # RSI and SMAs only
-    python3 train.py $label ZZS HA MACD SO SMA > rsiema_$label.tex # RSI and EMA only
-    python3 train.py $label EMA ZZS HA MACD SO RSI > sma_$label.tex # SMAs only    
-    mkdir -p $workdir/data/$label
-    mv *.csv $workdir/data/$label
-    mv *.eps $workdir/data/$label
+    echo Training $label with only RSI and SMA
+    python3 train.py $label EMA ZZS HA MACD SO > rsisma_$label.tex
+    echo Training $label with only RSI and EMA
+    python3 train.py $label ZZS HA MACD SO SMA > rsiema_$label.tex 
+    echo Training $label with only SMA
+    python3 train.py $label EMA ZZS HA MACD SO RSI > sma_$label.tex dt
 done
 
 cat perf_*.tex | sort | grep total > bottom1.tex

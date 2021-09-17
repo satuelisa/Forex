@@ -99,24 +99,22 @@ if __name__ == "__main__":
     for td in horizons:
         for thr in thresholds:
             with open(f'char_{td}_{thr}.csv', 'w') as output:
-                classes =  [ f'HT-{td}-{thr}-above,HT-{td}-{thr}-sign' ]
-                hdr = ','.join(indicators + classes)
+                hdr = ','.join(indicators) + ',label'
                 print(f'Date,{hdr}', file = output)
                 semaphore = None
                 for date in sorted(list(complete)):
                     baseline = float(raw[date])
-                    forecasts = ''
                     skip = False
                     semaphore = zzs[date] if date in zzs else semaphore
                     if semaphore is not None:
                         later = raw.get(postpone(date, td), None)
                         if later is not None: # data for that day not available
                             perc = 100 * ((float(later) - baseline) / baseline) 
-                            forecasts = f'{1 * (fabs(perc) >= thr)},{1 * (perc > 0)}'
-                            # three classes: significant increase, significant decrease, neither
-                            if forecasts == '0,1':
-                                forecasts = '0,0' 
+                            magnitude = 1 * (fabs(perc) >= thr)
+                            sign = 1 * (perc > 0)
+                            # three classes: significant increase = 2, significant decrease = 0, neither 1
+                            forecast = 2 if magnitude and sign else 0 if magnitude and not sign else 1
                             ss = ','.join([str(sma[w][date]) for w in windows])
                             es = ','.join([str(ema[w][date]) for w in windows])                            
-                            print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecasts}', file = output)
+                            print(f'{date},{ss},{es},{ha[date]},{semaphore},{so[date]},{rsi[date]},{ms[date]},{me[date]},{forecast}', file = output)
     print(f'Characterization concluded after {time() - start} seconds')

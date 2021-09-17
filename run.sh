@@ -72,7 +72,9 @@ cat header.tex top6.tex sep.tex bottom6.tex footer.tex > $workdir/sma.tex
 python3 comp.py > comp.csv
 Rscript comp.R
 cp comp.png $workdir
+
 for vis in `ls -1 *.svg`;
 do
     label=`basename $vis .svg`
     inkscape -E $basename.eps $vis
+cp *.eps $workdir

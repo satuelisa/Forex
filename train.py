@@ -198,8 +198,8 @@ for horizon in horizons:
             ma = np.mean(absent)
             abs = f'{ma:.2f}' if ma > 0 else '---'
             classcounts = ' & '.join([str(counters[i]) if i in counters else '---' for i in [0, 1, 2]])
-            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {classcounts} ', \
-                  f'{l} & {h} & {abs} & ', \
+            print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {classcounts} & ', \
+                  f'{l} & {h} & {abs} &', \
                   ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')
 if total > 0:

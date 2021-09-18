@@ -34,8 +34,8 @@ do
     python3 characterize.py $dataset
     mkdir -p $workdir/data/$label
     cp *.csv $workdir/data/$label
-    sort -R char_2_3.csv | head -n 10 > sample.tex
-    sed 's/\s\+/ \& /g;s/$/ \\\\/g' sample.tex > $workdir/sample_$label.tex
+#    sort -R char_2_3.csv | head -n 10 > sample.tex
+#    sed 's/\s\+/ \& /g;s/$/ \\\\/g' sample.tex > $workdir/sample_$label.tex
     echo Training $label with all the features
     python3 train.py $label > perf_$label.tex
     echo Training $label without RSI
@@ -85,10 +85,16 @@ python3 comp.py > comp.csv
 Rscript comp.R
 cp comp.png $workdir
 
-# convert the decision trees into EPS for the manuscript
+# make example decision trees in EPS for the manuscript
+
+python3 dtvis.py $workdir/AUDUSD/char_2_0.3.csv > $workdir/scorefull.txt
+mv vis.svg full.svg
+python3 dtvis.py $workdir/AUDUSD/char_2_0.3.csv RSI SMA-3 > $workdir/scoremini.txt
+mv vis.svg mini.svg
 
 for vis in `ls -1 *.svg`;
 do
     label=`basename $vis .svg`
     inkscape -E $basename.eps $vis
+    # inkscape --export-dpi 300 -z $vis -e $label.png # these tend to be huge
 cp *.eps $workdir

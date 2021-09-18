@@ -11,10 +11,11 @@ full = cols[1:-4] # the first one is the date and the last four are the labels
 labels = cols[-4] # these are the raw labels (0, 1, 2)
 names = []
 for f in full:
-    if 'SMA-' in f:
+    if f in argv or len(argv) < 3:
         names.append(f)
 X = data[names]
 y = data[labels]
+print(names)
 
 dt = DecisionTreeClassifier()
 model = dt.fit(X, y)

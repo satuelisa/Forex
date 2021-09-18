@@ -149,4 +149,3 @@ Training RUB without RSI and MACD
 Training RUB with only RSI and SMA
 Training RUB with only RSI and EMA
 Training RUB with only SMA
-The process took 0 seconds

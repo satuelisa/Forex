@@ -50,8 +50,8 @@ do
     python3 train.py $label EMA ZZS HA MACD SO RSI > sma_$label.tex dt
 done
 endtime=$(date +%s.%N)
-duration=$((end-start))
-echo The process took $duration seconds
+hours=`python3 timer.py $endtime $starttime`
+echo The process took $hours hours
 
 # build the LaTeX tables of the results
 

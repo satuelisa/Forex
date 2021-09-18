@@ -60,6 +60,8 @@ class FRFS(Preprocessor):
 # rewriting ends
 
 dataset = argv[1]
+if len(dataset) == 3:
+    dataset = 'USD' + dataset # consistent output
 MINIMUM = 30
 above = 0.7
 underline = 0.9
@@ -102,7 +104,7 @@ for horizon in horizons:
         scores = []
         fstimes = []
         ctimes = []
-        absent = []
+        undecided = []
         uses = defaultdict(int)
         data = pd.read_csv(f'char_{horizon}_{change}.csv')
         n = len(data)
@@ -165,18 +167,15 @@ for horizon in horizons:
             for i in range(len(expected)): # defuzz the results
                 result = fuzzy[i]
                 highest = max(result)
-                if highest == 0:
-                    predicted.append(3) # none of the classes matched
-                else:
-                    matches = [] # could be more than one
-                    for p in range(len(binary)):
-                        if result[p] == highest:
-                            matches.append(p)
-                    if expected[i] in matches:
-                        predicted.append(expected[i]) # rule in favor when present
-                    else:
-                        predicted.append(choice(matches)) # draw at random if absent
-            absent.append(100 * np.sum(predicted == 3) / len(predicted))
+                matches = [] # could be more than one
+                for p in range(len(binary)):
+                    if result[p] == highest:
+                        matches.append(p)
+                if len(matches) == 1:
+                    predicted.append(matches[0]) # the only one
+                else: # multiple
+                    predicted.append(3) # undecided (artificial class)
+            undecided.append(100 * np.sum(predicted == 3) / len(predicted)) # what proportion where there
             f1 = f1_score(expected, predicted, average = 'weighted')
             scores.append(f1)
         if len(scores) > 0:
@@ -195,11 +194,11 @@ for horizon in horizons:
             l = f'{low:.2f}'
             if low < emphasize:
                 l = '{\\em ' + l + '}'
-            ma = np.mean(absent)
-            abs = f'{ma:.2f}' if ma > 0 else '---'
+            uc = np.mean(undecided)
+            fuzzy = f'{uc:.2f}' if uc > 0 else '---'
             classcounts = ' & '.join([str(counters[i]) if i in counters else '---' for i in [0, 1, 2]])
             print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {classcounts} & ', \
-                  f'{l} & {h} & {abs} &', \
+                  f'{l} & {h} & {fuzzy} &', \
                   ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')
 if total > 0:

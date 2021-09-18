@@ -1,8 +1,10 @@
 import os
 from sys import argv
 
+expected = 7 * 15 * 15
 limit = 30
 below = {0: 0, 1: 0, 2: 0}
+giant = 0
 total = 0
 
 for filename in os.listdir('.'):
@@ -20,9 +22,16 @@ for filename in os.listdir('.'):
                 line = line.replace('---', '0')
                 total += 1
                 line = line.strip().split('&')[3:6]
+                cases = 0
                 for count in range(3):
                     if int(line.pop(0)) < limit:
                         below[count] += 1
+                        cases += 1
+                if cases > 1:
+                    giant += 1
 for v in below:
     c = below[v]
-    print(v, c, 100 * c / total)
+    print(v, c, 100 * c / expected)
+missing = expected - total
+print('uniclass', giant, giant / expected)
+print('untrainable', missing, missing / expected)

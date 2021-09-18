@@ -1,0 +1,152 @@
+Target directory is /home/elisa/Dropbox/Research/Topics/Forex
+AUDUSD
+Characterizing AUDUSD
+Characterization begins
+Characterization concluded after 1.7560534477233887 seconds
+Training AUDUSD with all the features
+Training AUDUSD without RSI
+Training AUDUSD without RSI and MACD
+Training AUDUSD with only RSI and SMA
+Training AUDUSD with only RSI and EMA
+Training AUDUSD with only SMA
+BTCUSD
+Characterizing BTCUSD
+Characterization begins
+Characterization concluded after 2.072585105895996 seconds
+Training BTCUSD with all the features
+Training BTCUSD without RSI
+Training BTCUSD without RSI and MACD
+Training BTCUSD with only RSI and SMA
+Training BTCUSD with only RSI and EMA
+Training BTCUSD with only SMA
+CNY
+Characterizing CNY
+Characterization begins
+Characterization concluded after 1.7495343685150146 seconds
+Training CNY with all the features
+Training CNY without RSI
+Training CNY without RSI and MACD
+Training CNY with only RSI and SMA
+Training CNY with only RSI and EMA
+Training CNY with only SMA
+EURCAD
+Characterizing EURCAD
+Characterization begins
+Characterization concluded after 1.7458183765411377 seconds
+Training EURCAD with all the features
+Training EURCAD without RSI
+Training EURCAD without RSI and MACD
+Training EURCAD with only RSI and SMA
+Training EURCAD with only RSI and EMA
+Training EURCAD with only SMA
+EURCHF
+Characterizing EURCHF
+Characterization begins
+Characterization concluded after 1.7657310962677002 seconds
+Training EURCHF with all the features
+Training EURCHF without RSI
+Training EURCHF without RSI and MACD
+Training EURCHF with only RSI and SMA
+Training EURCHF with only RSI and EMA
+Training EURCHF with only SMA
+EURGBP
+Characterizing EURGBP
+Characterization begins
+Characterization concluded after 1.7749464511871338 seconds
+Training EURGBP with all the features
+Training EURGBP without RSI
+Training EURGBP without RSI and MACD
+Training EURGBP with only RSI and SMA
+Training EURGBP with only RSI and EMA
+Training EURGBP with only SMA
+EURJPY
+Characterizing EURJPY
+Characterization begins
+Characterization concluded after 1.7963669300079346 seconds
+Training EURJPY with all the features
+Training EURJPY without RSI
+Training EURJPY without RSI and MACD
+Training EURJPY with only RSI and SMA
+Training EURJPY with only RSI and EMA
+Training EURJPY with only SMA
+EURSEK
+Characterizing EURSEK
+Characterization begins
+Characterization concluded after 1.806488037109375 seconds
+Training EURSEK with all the features
+Training EURSEK without RSI
+Training EURSEK without RSI and MACD
+Training EURSEK with only RSI and SMA
+Training EURSEK with only RSI and EMA
+Training EURSEK with only SMA
+EURUSD
+Characterizing EURUSD
+Characterization begins
+Characterization concluded after 1.7867352962493896 seconds
+Training EURUSD with all the features
+Training EURUSD without RSI
+Training EURUSD without RSI and MACD
+Training EURUSD with only RSI and SMA
+Training EURUSD with only RSI and EMA
+Training EURUSD with only SMA
+GBPJPY
+Characterizing GBPJPY
+Characterization begins
+Characterization concluded after 1.692917823791504 seconds
+Training GBPJPY with all the features
+Training GBPJPY without RSI
+Training GBPJPY without RSI and MACD
+Training GBPJPY with only RSI and SMA
+Training GBPJPY with only RSI and EMA
+Training GBPJPY with only SMA
+GBPUSD
+Characterizing GBPUSD
+Characterization begins
+Characterization concluded after 1.5944187641143799 seconds
+Training GBPUSD with all the features
+Training GBPUSD without RSI
+Training GBPUSD without RSI and MACD
+Training GBPUSD with only RSI and SMA
+Training GBPUSD with only RSI and EMA
+Training GBPUSD with only SMA
+JPY
+Characterizing JPY
+Characterization begins
+Characterization concluded after 1.8079450130462646 seconds
+Training JPY with all the features
+Training JPY without RSI
+Training JPY without RSI and MACD
+Training JPY with only RSI and SMA
+Training JPY with only RSI and EMA
+Training JPY with only SMA
+MXN
+Characterizing MXN
+Characterization begins
+Characterization concluded after 1.706524133682251 seconds
+Training MXN with all the features
+Training MXN without RSI
+Training MXN without RSI and MACD
+Training MXN with only RSI and SMA
+Training MXN with only RSI and EMA
+Training MXN with only SMA
+NZDUSD
+Characterizing NZDUSD
+Characterization begins
+Characterization concluded after 1.7169129848480225 seconds
+Training NZDUSD with all the features
+Training NZDUSD without RSI
+Training NZDUSD without RSI and MACD
+Training NZDUSD with only RSI and SMA
+Training NZDUSD with only RSI and EMA
+Training NZDUSD with only SMA
+RUB
+Characterizing RUB
+Characterization begins
+Characterization concluded after 1.7942438125610352 seconds
+Training RUB with all the features
+Training RUB without RSI
+Training RUB without RSI and MACD
+Training RUB with only RSI and SMA
+Training RUB with only RSI and EMA
+Training RUB with only SMA
+The process took 0 seconds

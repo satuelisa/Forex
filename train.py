@@ -63,7 +63,7 @@ dataset = argv[1]
 if len(dataset) == 3:
     dataset = 'USD' + dataset # consistent output
 MINIMUM = 30
-above = 0.7
+above = 0.8
 underline = 0.9
 emphasize = 0.7
 visthr = 0.95
@@ -85,9 +85,9 @@ for f in full:
 print('% EXCL', ' '.join(skip))
 
 with open('header.tex', 'w') as hdr:
-    print('\\begin{{tabular}}{{|l|rr|rrr|rrr|{}|r|rr|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
+    print('\\begin{{tabular}}{{|l|rr|rrr|rr|{}|r|rr|rr|}}\n\\hline'.format('c' * len(full)), file = hdr)
     print('\multirow{2}{*}{Currency pair} & \multirow{2}{*}{{\\bf H}} & \multirow{2}{*}{{\\bf T}}', \
-          ' & \\multicolumn{3}{|c|}{{\\bf Frequency}} & \\multicolumn{3}{|c|}{{\\bf Score}} & ',\
+          ' & \\multicolumn{3}{|c|}{{\\bf Frequency}} & \\multicolumn{2}{|c|}{{\\bf Score}} & ',\
           ' & '.join([f'\\sr \\multirow{{2}}{{*}}{{\\rotatebox{{90}}{{{label}}}}}' for label in full]), \
           ' & \\multirow{2}{*}{\#} & \multicolumn{2}{|p{14mm}|}{Feature selection} & \multicolumn{2}{|c|}{Model} \\\\\n', file = hdr)
     print('& & & $\\downarrow$ & $\\approx$ & $\\uparrow$ & $\\min$ & $\\max$ & \\% & ' + ' & '.join([f'' for label in full]), \
@@ -104,7 +104,6 @@ for horizon in horizons:
         scores = []
         fstimes = []
         ctimes = []
-        undecided = []
         uses = defaultdict(int)
         data = pd.read_csv(f'char_{horizon}_{change}.csv')
         n = len(data)
@@ -171,11 +170,8 @@ for horizon in horizons:
                 for p in range(len(binary)):
                     if result[p] == highest:
                         matches.append(p)
-                if len(matches) == 1:
-                    predicted.append(matches[0]) # the only one
-                else: # multiple
-                    predicted.append(3) # undecided (artificial class)
-            undecided.append(100 * np.sum(predicted == 3) / len(predicted)) # what proportion where there
+                assert len(matches) == 1 # these would be fuzzy cases, we never had any
+                predicted.append(matches[0]) # the only one
             f1 = f1_score(expected, predicted, average = 'weighted')
             scores.append(f1)
         if len(scores) > 0:
@@ -194,11 +190,9 @@ for horizon in horizons:
             l = f'{low:.2f}'
             if low < emphasize:
                 l = '{\\em ' + l + '}'
-            uc = np.mean(undecided)
-            fuzzy = f'{uc:.2f}' if uc > 0 else '---'
             classcounts = ' & '.join([str(counters[i]) if i in counters else '---' for i in [0, 1, 2]])
             print(f'{comment}{{\sc {dataset}}} & {horizon} & {change} & {classcounts} & ', \
-                  f'{l} & {h} & {fuzzy} &', \
+                  f'{l} & {h} &', \
                   ' & '.join([str(uses[x]) if x not in skip else NA for x in full]), \
                   f'& {len(data):,} & {fsavg:.2f} & {fssd:.2f} & {cavg:.2f} & {csd:.2f} \\\\')
 if total > 0:

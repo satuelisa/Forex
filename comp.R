@@ -12,4 +12,4 @@ p <- ggplot(data = d, aes(x = Indicator, y = Percentage, fill = Experiment)) +
     theme(axis.text.x = element_text(angle = 90)) +
     scale_fill_manual(labels = ena, values = c('#00aa00','#99aa00', '#0099cc', '#9900aa', '#cc99aa', '#aa9900'))
 
-ggsave("comp.png", width = 8, height = 5, dpi = 300)
+ggsave("comp.eps", width = 8, height = 5, dpi = 300)

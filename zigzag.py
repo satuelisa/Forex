@@ -10,7 +10,8 @@ threshold = {3: 0.1,
              1: 0.01}
 
 filename = argv[1]
-print('''set term postscript eps color font ",18"
+if 'stdout' not in argv:
+    print('''set term postscript eps color font ",18"
 set size 2, 1.5
 set xlabel 'Time'
 set xdata time
@@ -61,23 +62,28 @@ with open(filename) as data:
                                 if labels.get(loc, (0, 0))[0] < k:
                                     if after(loc) and before(loc): # in the plotted range
                                         labels[loc] = (k, f'set label "{k}" at "{loc}", {value - offset} font ",{s[k]}" tc rgb "#dd0000"', 0)
-                                        print(f'set arrow from "{loc}", graph 0 to "{loc}", graph 1 nohead lt -1 dt 3 lw 1 lc rgb "#ff0000"')
+                                        if 'stdout' not in argv:
+                                            print(f'set arrow from "{loc}", graph 0 to "{loc}", graph 1 nohead lt -1 dt 3 lw 1 lc rgb "#ff0000"')
                             if hist[k][0] < hist[k][1] and hist[k][1] > hist[k][2]:
                                 if labels.get(loc, (0, 0))[0] < k:
                                     if after(loc) and before(loc): # in the plotted range
                                         labels[loc] = (k, f'set label "{k}" at "{loc}", {value + offset} font ",{s[k]}" tc rgb "#009900"', 1)
-                                        print(f'set arrow from "{loc}", graph 0 to "{loc}", graph 1 nohead lt -1 dt 3 lw 1 lc rgb "#00dd00"')
+                                        if 'stdout' not in argv:
+                                            print(f'set arrow from "{loc}", graph 0 to "{loc}", graph 1 nohead lt -1 dt 3 lw 1 lc rgb "#00dd00"')
             prev = curr
 for k in threshold:
     df[k].close()
 with open(f'zzs.csv', 'w') as semaphore:
     for loc in labels:
         l = labels[loc]
-        if after(loc):
+        if after(loc) and 'stdout' not in argv:
             print(l[1])
         print(f'{loc},{l[0]},{l[-1]}', file = semaphore)
-print('show arrow\nshow label')
-print(f'plot "{filename}" using 1:5 title "Closing price" with points lt -1 pt 7 lc rgb "#000000", \\')
-print('"zz_1.csv" using 1:2 title "Smallest threshold" with line lt -1 lw 3 lc rgb "#999900", \\')
-print('"zz_2.csv" using 1:2 title "Middle threshold" with lines lt -1 lw 5 lc rgb "#009999", \\')
-print('"zz_3.csv" using 1:2 title "Largest threshold" with lines lt -1 lw 7 lc rgb "#990099"')
+        if 'stdout' in argv:
+            print(f'{loc},{l[0]},{l[-1]}')
+if 'stdout' not in argv: 
+    print('show arrow\nshow label')
+    print(f'plot "{filename}" using 1:5 title "Closing price" with points lt -1 pt 7 lc rgb "#000000", \\')
+    print('"zz_1.csv" using 1:2 title "Smallest threshold" with line lt -1 lw 3 lc rgb "#999900", \\')
+    print('"zz_2.csv" using 1:2 title "Middle threshold" with lines lt -1 lw 5 lc rgb "#009999", \\')
+    print('"zz_3.csv" using 1:2 title "Largest threshold" with lines lt -1 lw 7 lc rgb "#990099"')

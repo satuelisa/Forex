@@ -47,7 +47,7 @@ for t in range(l - 1, len(closing)):
     else:
         missing += 1
         if missing > threshold:
-            if output:
+            if output and 'stdout' not in argv:
                 print('  ') # break lines for missing data
                 output = False
             missing = 0

@@ -45,6 +45,8 @@ for step in range(t):
         window[kind].append(d)
         print(f'{dates[step]},{d},diff', file = target[kind])
         print(f'{dates[step]},{sum(window[kind]) / len(window[kind])},macd', file = target[kind])
+        if 'stdout' in argv:
+            print(f'{kind},{dates[step]},{sum(window[kind]) / len(window[kind])}')            
         if len(window[kind]) == diff:
             window[kind].pop(0)
         

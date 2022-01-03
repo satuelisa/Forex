@@ -24,6 +24,8 @@ if __name__ == '__main__':
             for value in series[1:]:
                 window.append(value)
                 print(f'{dates[t]},{sum(window) / len(window)}', file = target)
+                if 'stdout' in argv:
+                    print(f'sma,{l},{dates[t]},{sum(window) / len(window)}')                    
                 if len(window) == l:
                     window.pop(0)
                 t += 1
@@ -35,6 +37,8 @@ if __name__ == '__main__':
             for value in series[1:]:
                 assert value > 0
                 print(f'{dates[t]},{curr}', file = target)
+                if 'stdout' in argv:
+                    print(f'ema,{l},{dates[t]},{curr}')                    
                 curr = rho * value + (1 - rho) * curr
                 t += 1
         with open('avg.plot', 'w') as target:

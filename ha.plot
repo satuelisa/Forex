@@ -1,5 +1,5 @@
 set term postscript eps color font ",28"
-set size 3, 2.2
+set size 7, 2.2
 set palette defined (-1 '#ff0000', 1 '#009900')
 set cbrange [-1:1]
 unset colorbox
@@ -8,7 +8,8 @@ set ylabel 'Price'
 set xlabel 'Time'
 set xdata tim
 set timefmt "%Y-%m-%d-%H"
-set format x "%Y-%m-%d %H:00"
+set format x "%Y-%m-%d"
+set xrange ["2020-01-01":"2020-12-31"]
 set xtics rotate by 90 right
 set autoscale xfix
 set datafile separator ','

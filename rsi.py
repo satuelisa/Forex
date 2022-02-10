@@ -47,7 +47,7 @@ for t in range(t, n):
     if d is None:
         missing += 1
         if missing > threshold:
-            if output:
+            if output and 'stdout' not in argv:
                 print(' ')
                 output = False
     else:

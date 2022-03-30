@@ -170,8 +170,10 @@ for horizon in horizons:
                 for p in range(len(binary)):
                     if result[p] == highest:
                         matches.append(p)
-                assert len(matches) == 1 # these would be fuzzy cases, we never had any
-                predicted.append(matches[0]) # the only one
+                if len(matches) > 1: # a fuzzy case
+                    predicted.append(3) # undecided (a fourth class)
+                else:
+                    predicted.append(matches[0]) # the only one (0, 1 or 2)
             f1 = f1_score(expected, predicted, average = 'weighted')
             scores.append(f1)
         if len(scores) > 0:
